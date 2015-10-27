@@ -1,13 +1,13 @@
 {% extends '_layouts/base.html' %}
-{% load crispy_forms_tags %}
 
+{% block headline %}
+	Form Submitted Successfully!
+{% endblock %}
 
 
 {% block content %}
 
-<br><br>
-<center><h1>View Appointments</h1></center>
-<hr>
+<h1>View/Edit Appointment Data</h1>
 
 {% if user.is_authenticated %}
 
@@ -18,10 +18,11 @@
 	<thead>
 		<tr>
 			<th>Doctor &amp; Speciality</th>
-			<th>Summary</th>
+			<th>Pain Level</th>
 			<th>Date &amp; Time</th>
-			<th>Edit</th>
-			<th>Cancel</th>
+			<th>Medical Conditions</th>
+			<th>Allergies</th>
+			<th>Current Health Conditions</th>
 		</tr>
 	</thead>
 	<!-- Table Header -->
@@ -31,16 +32,14 @@
 		{% for appts in current_appts_list %}
 		{% if appts.resolved == 0 %}
 			<tr>
-
 				<td>{{appts.doctor|title}}</td>
-				<td>
-				{{appts.medical_conditions|title}}
-				</td>
+				<td>{{appts.pain_level}}</td>
 				<td>{{appts.date}}</td>
-				<td><a href="/accounts/portal/view_appts_data">Revise</a></td>
-				<td>Cancel</td>
-
+				<td>{{appts.medical_conditions|title}}</td>
+				<td>{{appts.allergies}}</td>
+				<td>{{appt.current_health_conditions|title}}</td>
 			</tr>
+	
 		{% endif %}
 		{% endfor %}
 
@@ -61,3 +60,4 @@
 {% endif %}
 
 {% endblock %}
+

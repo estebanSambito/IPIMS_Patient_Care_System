@@ -42,6 +42,7 @@ urlpatterns = [
     url(r'^accounts/portal/admin/resolve_patient_case$', ResolvedPatientAjaxView, name="ResolvedPatientAjaxView"),
     url(r'^accounts/portal/medical_history$', MedicalHistoryView, name="MedicalHistoryView"),
     url(r'^accounts/portal/prescribe$', PrescribeMedicationView, name="PrescribeMedicationView"),
+    url(r'^accounts/portal/view_appts_data/$', ApptDataView, name="ApptDataView"), #Jez added this
     
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
