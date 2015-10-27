@@ -37,7 +37,11 @@
 				{{appts.medical_conditions|title}}
 				</td>
 				<td>{{appts.date}}</td>
-				<td><a href="/accounts/portal/view_appts_data">Revise</a></td>
+				<td><form action="{% url 'ApptDataView' appts.id %}" 	method="POST"> 	<!-- jez added this -->
+					    {% csrf_token %}
+					    <input type="submit" value="revise" />
+					</form>
+				</td>
 				<td>Cancel</td>
 
 			</tr>
