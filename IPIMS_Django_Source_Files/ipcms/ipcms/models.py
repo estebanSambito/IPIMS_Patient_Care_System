@@ -9,7 +9,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 class Doctor(models.Model):
 	doctor_first_name = models.CharField(max_length=256, default="")
 	doctor_last_name = models.CharField(max_length=256, default="")
-	doctor_type = models.CharField(max_length=256, choices=[('Gynecologist', 'Gynecologist'), ('Neurologist', 'Neurologist'), ('Therapist', 'Therapist'), ('Allergist', 'Allergist'), ('Cardiologist', 'Cardiologist'), ('Dermatologist', 'Dermatologist'), ('Oncologist', 'Oncologist'), ('ENT', 'ENT'), ('Plastic Surgeon', 'Plastic Surgeon'), ('Psychiatrist', 'Psychiatrist'), ('Urologist','Urologist'), ('Podiatrist', 'Podiatrist')], default="Select Doctor Type") 
+	doctor_type = models.CharField(max_length=256, choices=[('Gynecologist', 'Gynecologist'), ('Neurologist', 'Neurologist'), ('Therapist', 'Therapist'), ('Allergist', 'Allergist'), ('Cardiologist', 'Cardiologist'), ('Dermatologist', 'Dermatologist'), ('Oncologist', 'Oncologist'), ('ENT', 'ENT'), ('Plastic Surgeon', 'Plastic Surgeon'), ('Psychiatrist', 'Psychiatrist'), ('Urologist','Urologist'), ('Podiatrist', 'Podiatrist')], default="Select Doctor Type")
 	doctor_user = models.OneToOneField(User, unique=True, blank=False, default="", null=False)
 
 	def __unicode__(self):
@@ -34,7 +34,7 @@ class TempPatientData(models.Model):
 	gender = models.CharField(max_length=256, choices=[('male','Male'), ('female', 'Female'), ('other', 'Other'), ('prefer not to say', 'Prefer Not To Say')], default='Select a gender', blank = False)
 	race = models.CharField(max_length=256, choices=[('white', 'White'), ('american_indian_alaskan_native', 'American Indian or Alaskan Native'),('hawaiian', 'Native Hawaiian or Other Pacific Islander'),('black', 'Black or African American'),('asian', 'Asian'), ('other', 'Other')], default="Other")
 	income = models.CharField(max_length=256, choices=[('$0-$10,000', '$0-$10,000'), ('$10,001-$30,000', '$10,001-$30,000'), ('$30,001-$60,000', '$30,001-$60,000'),('$60,001-$85,000', '$60,001-$85,000'), ('$85,001-$110,000', '$85,001-$110,000'), ('$110,001+', '$110,001+'), ('Prefer Not To Say', 'Prefer Not To Say')], default='Prefer Not To Say', blank=False)
-	phone_number = PhoneNumberField(blank = False, default="")
+	phone_number = PhoneNumberField(blank = True, default="")
 	DOB = models.DateField(auto_now=False, auto_now_add=False, default="")
 	ssn = models.IntegerField(blank=False)
 	allergies = models.CharField(max_length=256, default="")
