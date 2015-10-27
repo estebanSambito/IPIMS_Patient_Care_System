@@ -42,7 +42,7 @@ urlpatterns = [
     url(r'^accounts/portal/admin/resolve_patient_case$', ResolvedPatientAjaxView, name="ResolvedPatientAjaxView"),
     url(r'^accounts/portal/medical_history$', MedicalHistoryView, name="MedicalHistoryView"),
     url(r'^accounts/portal/prescribe$', PrescribeMedicationView, name="PrescribeMedicationView"),
-    
+    url(r'^delete/(?P<pk>\d+)$', appt_delete, name='delete'),
+
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-

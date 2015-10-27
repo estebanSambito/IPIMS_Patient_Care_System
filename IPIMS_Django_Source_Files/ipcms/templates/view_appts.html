@@ -38,7 +38,12 @@
 				</td>
 				<td>{{appts.date}}</td>
 				<td>Revise</td>
-				<td>Cancel</td>
+				<td>
+					<form action="{% url 'delete' appts.id %}" method="POST">
+							{% csrf_token %}
+							<input type="submit" value="Cancel" />
+					</form>
+				</td>
 
 			</tr>
 		{% endif %}
