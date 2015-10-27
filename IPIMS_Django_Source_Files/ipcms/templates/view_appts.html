@@ -37,7 +37,8 @@
 				{{appts.medical_conditions|title}}
 				</td>
 				<td>{{appts.date}}</td>
-				<td><form action="{% url 'ApptDataView' appts.id %}" 	method="POST"> 	<!-- jez added this -->
+				<td>
+					<form action="{% url 'ApptDataView' appts.id %}" 	method="POST"> 	<!-- jez added this -->
 					    {% csrf_token %}
 					    <input type="submit" value="revise" />
 					</form>

@@ -624,18 +624,87 @@ def ApptView(request):
 #Jez added this
 def ApptDataView(request, pk):
 	appt = PatientAppt.objects.get(pk=pk)
+	instance = PatientAppt.objects.get(pk=pk)
 	current_appts_list = []
 	current_patient = Patient.objects.filter(user=request.user)[:1].get()
 
 	if request.method=='POST':
 		current_appts_list.append(appt)
-	
 
+	if request.method=='Post':
+		form = PatientApptForm(request.POST, instance=instance or None)
+		instance = form.save(commit=False)
+		instance.patient = patient
+		instance.user = patient
+		instance.current_health_conditions = patient_conditions
+		instance.save()
+		return HttpResponseRedirect('formsuccess')
+	else:
+		form = PatientApptForm(instance=instance)
+	
 	context = {
+		'form': form,
 		'current_appts_list': current_appts_list,
 		'current_patient': current_patient
 	}
 	return render(request, 'view_appts_data.html', context)
+
+def ApptDataEdit(request, pk):
+	appt = PatientAppt.objects.get(pk=pk)
+	instance = PatientAppt.objects.get(pk=pk)
+
+	if request.method=='Post':
+		form = PatientApptForm(request.POST, instance=instance or None)
+		instance = form.save(commit=False)
+		instance.patient = patient
+		instance.user = patient
+		instance.current_health_conditions = patient_conditions
+		instance.save()
+		return HttpResponseRedirect('formsuccess')
+	else:
+		form = PatientApptForm(instance=instance)
+	
+	context = {
+		'form': form,
+	}
+	return render(request, 'view_appts_data.html', context)
+
+
+#def ApptDataView(request, pk):
+#	title = "Edit Appointment"
+#	form = PatientApptForm(request.POST or None)
+#	appts = PatientAppt
+#
+#
+#	appt = appts.objects.filter(pk=pk)[:1].get()
+#
+#	if (PatientAppt.objects.filter(pk=pk)[:1].exists()):
+#
+#		instance = PatientAppt.objects.filter(pk=pk)[:1].get()
+#		form = PatientApptForm(appt)
+#
+#	if request.method == "POST":
+#
+#		TPD = PatientAppt.objects.filter(pk=pk)[:1].get()
+
+#		if (not TPD is None):
+#			instance = PatientAppt.objects.filter(pk=pk)[:1].get()
+
+			# form = TempPatientDataForm(request.POST, instance = instance)
+
+#		form = PatientApptForm(request.POST, instance = TPD)
+#		if form.is_valid():
+
+#			form.save()
+#		else:
+#			print form.errors
+
+
+#	context = {
+#		"form": form,
+#		"template_title": title
+#	}
+#	return render(request, 'view_appts_data.html', context)
 
 def GenerateStatsView(request):
 
