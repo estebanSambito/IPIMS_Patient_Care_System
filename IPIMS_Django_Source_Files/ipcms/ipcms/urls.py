@@ -43,6 +43,7 @@ urlpatterns = [
     url(r'^accounts/portal/medical_history$', MedicalHistoryView, name="MedicalHistoryView"),
     url(r'^accounts/portal/prescribe$', PrescribeMedicationView, name="PrescribeMedicationView"),
     url(r'^accounts/portal/view_appts_data/(?P<pk>\d+)$', ApptDataView, name="ApptDataView"), #Jez added this
+    url(r'^accounts/portal/view_appts_edit/(?P<pk>\d+)$', ApptDataEdit, name="ApptDataEdit"),
     
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

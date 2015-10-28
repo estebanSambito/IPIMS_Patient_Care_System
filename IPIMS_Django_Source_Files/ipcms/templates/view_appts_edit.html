@@ -13,7 +13,7 @@
 {% if user.is_authenticated %}
 
 		<div class="col-sm-12">
-				<form method ='POST' action="\accounts/portal/view_appts_edit/1">
+				<form method ='POST' action=''>
 					{% csrf_token %}
 					{{ form|crispy }}
 					<input type="submit" value="Submit Changes" class="btn default"/>
