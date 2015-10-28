@@ -47,6 +47,12 @@
 				         	<input type="submit" class="btn-sm" value="View Medical History"> 
 				         	<input type="hidden" name="pk_patient" value={{appts.pk}}>
 				         </form>
+                         
+				         <b>Cancel Current Appointment:</b>
+					     <form action="{% url 'doctor_delete' appts.id %}" method="POST">
+				         	{% csrf_token %}
+				         	<input type="submit" class="btn-sm" value="Cancel Appointment"> 
+				         </form>
 
 				    	 {% if appts.resolved == 1 %}
 				    	 <h3><strike>Case Has Been Resolved</strike></h3>
