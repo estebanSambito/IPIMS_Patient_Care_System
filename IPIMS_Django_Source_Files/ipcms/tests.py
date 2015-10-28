@@ -271,9 +271,9 @@ class TestingHealthConditions(TestCase):
 		print 'Temporary Patient Created Successfully!'
 
 		#Assign the attributes that are associated with the user
-		temp_patient_object.first_name = "Ryan"
-		temp_patient_object.last_name = "Schachte"
-		temp_patient_object.DOB = "2201995"
+		temp_patient_object.first_name = "Kevin"
+		temp_patient_object.last_name = "Duong"
+		temp_patient_object.DOB = "1994-11-09"
 		temp_patient_object.ssn = "600489139"
 		temp_patient_object.allergies = "NONE"
 		temp_patient_object.address = "2463 E. Mallory Dr. Tempe, AZ 85281"
@@ -288,7 +288,7 @@ class TestingHealthConditions(TestCase):
 
 		self.assertEqual(temp_patient_object.first_name, "Ryan")
 		self.assertEqual(temp_patient_object.last_name, "Schachte")
-		self.assertEqual(temp_patient_object.DOB, "2201995")
+		self.assertEqual(temp_patient_object.DOB, "1994-11-09")
 		self.assertEqual(temp_patient_object.ssn, "600489139")
 		self.assertEqual(temp_patient_object.allergies, "NONE")
 		self.assertEqual(temp_patient_object.address, "2463 E. Mallory Dr. Tempe, AZ 85281")
@@ -328,9 +328,9 @@ class TestingPatient(TestCase):
 		print 'Temporary Patient Created Successfully!'
 
 		# 	#Assign the attributes that are associated with the user
-		temp_patient_object.first_name = "Ryan"
-		temp_patient_object.last_name = "Schachte"
-		temp_patient_object.DOB = "2201995"
+		temp_patient_object.first_name = "Kevin"
+		temp_patient_object.last_name = "Duong"
+		temp_patient_object.DOB = "1994-11-09"
 		temp_patient_object.ssn = "600489139"
 		temp_patient_object.allergies = "NONE"
 		temp_patient_object.address = "2463 E. Mallory Dr. Tempe, AZ 85281"
@@ -351,11 +351,12 @@ class TestingPatient(TestCase):
 		approved_patient.approved = 1
 		approval = approved_patient.approved
 
+		approved_patient.save()
+
 		# 	#Testing to ensure the object data from temp patient filtered down into the approved patient
 		self.assertEqual(approved_patient.user.username, temp_patient_object.user.username)
 		self.assertEqual(approved_patient.fill_from_application.DOB, "2201995")
 		self.assertEqual(approval, 1)
 
-		approved_patient.save()
 
 		print '\n\n\nThe patient has been approved succesfully!\n\n\n'
