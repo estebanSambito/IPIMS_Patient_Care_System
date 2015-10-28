@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.test.client import Client
-from ipcms.models import TempPatientData, Doctor, Patient, PatientHealthConditions, PatientAppt, Alert
+from ipcms.models import TempPatientData, Doctor, Patient, PatientHealthConditions, PatientAppt, Alert, EMedication
 from pprint import pprint
 
 #This will be used to prepare the creation of the users within the system
@@ -198,41 +198,109 @@ from pprint import pprint
 	# current_health_conditions = models.ForeignKey(PatientHealthConditions, unique=False, blank=True, default="", null=True)
 
 
-class TestingPatientAlertSystem(TestCase):
+# class TestingPatientAlertSystem(TestCase):
+
+# 	#Globally references patient object
+# 	def testAlertSystem(self):
+# 		temp_patient_object = TempPatientData.objects.create()
+# 		#Create the user to append into the model
+# 		temp_patient_object.user = User.objects.create(username="johnson", email="johnson@johnson.com", password="johnson")
+# 		print ('Temporary Patient Created Successfully!')
+
+# 		#Assign the attributes that are associated with the user
+# 		temp_patient_object.first_name = "Ryan"
+# 		temp_patient_object.last_name = "Schachte"
+# 		temp_patient_object.DOB = "2201995"
+# 		temp_patient_object.ssn = "600489139"
+# 		temp_patient_object.allergies = "NONE"
+# 		temp_patient_object.address = "2463 E. Mallory Dr. Tempe, AZ 85281"
+# 		temp_patient_object.medications = "NONE"
+# 		temp_patient_object.insurance_provider = "Allstate"
+# 		temp_patient_object.insurance_policy_number = "19938343434"
+# 		temp_patient_object.email_address = "johnson@johnson.com"
+# 		temp_patient_object.data_sent = "1"
+
+# 		#Save user into the test database
+# 		temp_patient_object.save()
+
+# 		self.assertEqual(temp_patient_object.first_name, "Ryan")
+# 		self.assertEqual(temp_patient_object.last_name, "Schachte")
+# 		self.assertEqual(temp_patient_object.DOB, "2201995")
+# 		self.assertEqual(temp_patient_object.ssn, "600489139")
+# 		self.assertEqual(temp_patient_object.allergies, "NONE")
+# 		self.assertEqual(temp_patient_object.address, "2463 E. Mallory Dr. Tempe, AZ 85281")
+# 		self.assertEqual(temp_patient_object.medications, "NONE")
+# 		self.assertEqual(temp_patient_object.insurance_provider, "Allstate")
+# 		self.assertEqual(temp_patient_object.insurance_policy_number, "19938343434")
+# 		self.assertEqual(temp_patient_object.email_address, "johnson@johnson.com")
+# 		self.assertEqual(temp_patient_object.data_sent, "1")
+
+# 		patient_object = Patient.objects.create()
+
+# 		patient_object.fill_from_application = temp_patient_object
+# 		patient_object.user = temp_patient_object.user
+# 		patient_object.approved = 1
+# 		patient_object.alertSent = 1
+
+# 		self.assertEqual(patient_object.alertSent,1)
+# 		self.assertEqual(patient_object.approved, 1)
+# 		self.assertEqual(patient_object.user.username, 'johnson')
+
+# 		patient_object.save()
+		
+# 		alert_object = Alert.objects.create()
+# 		alert_object.alert_level = 40
+# 		alert_object.alert_patient = patient_object
+# 		alert_object.alert_description = 'Hello, this is the description for alerts'
+# 		alert_object.save()
+
+# 		self.assertEqual(alert_object.alert_level, 40)
+# 		self.assertEqual(alert_object.alert_patient, patient_object)
+# 		alert_object.alert_description, 'Hello, this is the description for alerts'
+
+# 		pprint(alert_object)
+
+# 		print ('\n\n\nALERT FOR THE USER HAS BEEN SUCCESSFULLY CREATED!\n\n\n')
+#####################################################################################################
+
+
+class TestingPrescribeMedicine(TestCase):
 
 	#Globally references patient object
-	def testAlertSystem(self):
+	def testPMedicine(self):
 		temp_patient_object = TempPatientData.objects.create()
 		#Create the user to append into the model
-		temp_patient_object.user = User.objects.create(username="johnson", email="johnson@johnson.com", password="johnson")
-		print 'Temporary Patient Created Successfully!'
+		temp_patient_object.user = User.objects.create(username="user", email="user@user.com", password="newuser")
+		print ('Temporary Patient Created Successfully!')
 
-		#Assign the attributes that are associated with the user
-		temp_patient_object.first_name = "Ryan"
-		temp_patient_object.last_name = "Schachte"
-		temp_patient_object.DOB = "2201995"
-		temp_patient_object.ssn = "600489139"
+
+
+		# #Assign the attributes that are associated wi+th the user
+		temp_patient_object.first_name = "Sang"
+		temp_patient_object.last_name = "Le"
+		temp_patient_object.DOB = "1994-01-01"
+		temp_patient_object.ssn = "123456789"
 		temp_patient_object.allergies = "NONE"
-		temp_patient_object.address = "2463 E. Mallory Dr. Tempe, AZ 85281"
+		temp_patient_object.address = "3517 W Montebello AVE. Phoeninx, AZ 85019"
 		temp_patient_object.medications = "NONE"
-		temp_patient_object.insurance_provider = "Allstate"
-		temp_patient_object.insurance_policy_number = "19938343434"
-		temp_patient_object.email_address = "johnson@johnson.com"
+		temp_patient_object.insurance_provider = "AARP"
+		temp_patient_object.insurance_policy_number = "01039203820"
+		temp_patient_object.email_address = "user@user.com"
 		temp_patient_object.data_sent = "1"
 
-		#Save user into the test database
+		# #Save user into the test database
 		temp_patient_object.save()
 
-		self.assertEqual(temp_patient_object.first_name, "Ryan")
-		self.assertEqual(temp_patient_object.last_name, "Schachte")
-		self.assertEqual(temp_patient_object.DOB, "2201995")
-		self.assertEqual(temp_patient_object.ssn, "600489139")
+		self.assertEqual(temp_patient_object.first_name, "Sang")
+		self.assertEqual(temp_patient_object.last_name, "Le")
+		self.assertEqual(temp_patient_object.DOB, "1994-01-01")
+		self.assertEqual(temp_patient_object.ssn, "123456789")
 		self.assertEqual(temp_patient_object.allergies, "NONE")
-		self.assertEqual(temp_patient_object.address, "2463 E. Mallory Dr. Tempe, AZ 85281")
+		self.assertEqual(temp_patient_object.address, "3517 W Montebello AVE. Phoeninx, AZ 85019")
 		self.assertEqual(temp_patient_object.medications, "NONE")
-		self.assertEqual(temp_patient_object.insurance_provider, "Allstate")
-		self.assertEqual(temp_patient_object.insurance_policy_number, "19938343434")
-		self.assertEqual(temp_patient_object.email_address, "johnson@johnson.com")
+		self.assertEqual(temp_patient_object.insurance_provider, "AARP")
+		self.assertEqual(temp_patient_object.insurance_policy_number, "123456789")
+		self.assertEqual(temp_patient_object.email_address, "user@user.com")
 		self.assertEqual(temp_patient_object.data_sent, "1")
 
 		patient_object = Patient.objects.create()
@@ -241,24 +309,24 @@ class TestingPatientAlertSystem(TestCase):
 		patient_object.user = temp_patient_object.user
 		patient_object.approved = 1
 		patient_object.alertSent = 1
-
+		
 		self.assertEqual(patient_object.alertSent,1)
 		self.assertEqual(patient_object.approved, 1)
-		self.assertEqual(patient_object.user.username, 'johnson')
+		self.assertEqual(patient_object.user.username, 'user')
 
 		patient_object.save()
 		
-		alert_object = Alert.objects.create()
-		alert_object.alert_level = 40
-		alert_object.alert_patient = patient_object
-		alert_object.alert_description = 'Hello, this is the description for alerts'
-		alert_object.save()
+		emedication_object = EMedication.objects.create()
+		emedication_object.patient = patient_object
+		emedication_object.medication_name = 'This is the description for medication name '
+		emedication_object.save()
 
-		self.assertEqual(alert_object.alert_level, 40)
-		self.assertEqual(alert_object.alert_patient, patient_object)
-		alert_object.alert_description, 'Hello, this is the description for alerts'
+		self.assertEqual(emedication_object.patient, patient_object)
+		emedication_object.medication_name, 'This is the description for medication name '
 
-		pprint(alert_object)
+		pprint(emedication_object)
 
-		print '\n\n\nALERT FOR THE USER HAS BEEN SUCCESSFULLY CREATED!\n\n\n'
+		print ('\n\n\nEMedication FOR THE USER HAS BEEN SUCCESSFULLY CREATED!\n\n\n')
+
+		#################################################################################################
 
