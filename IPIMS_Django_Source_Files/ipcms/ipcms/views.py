@@ -621,7 +621,7 @@ def ApptView(request):
 
 	return render(request, 'view_appts.html', context)
 
-#Jez added this
+#This displays information on selected appointment 
 def ApptDataView(request, pk):
 	appt = PatientAppt.objects.get(pk=pk)
 
@@ -640,7 +640,7 @@ def ApptDataView(request, pk):
 		'form': form,
 	}
 	return render(request, 'view_appts_data.html', context)
-
+#Applies edit/changes on selected appointment 
 def ApptDataEdit(request, pk):
 
 	if request.method =="POST":
