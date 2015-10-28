@@ -856,7 +856,7 @@ def MedicalHistoryView(request):
 
 	elif request.method == "POST" and 'pk_patient2' in request.POST:
 
-		patient_primary_key = request.POST.get('pk_patient2', '')
+		patient_primary_key = request.POST.get('pk_patient2', '1')
 		print patient_primary_key
 
 		# current_patient = Patient.objects.filter(user_id=patient_primary_key).get()
