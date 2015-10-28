@@ -12,7 +12,7 @@ from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatie
 from django.shortcuts import render_to_response
 from .forms import PatientApptForm
 from django.template import RequestContext
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 
@@ -929,3 +929,24 @@ def appt_delete(request, pk):
 		'current_patient': current_patient
 	}
 	return render(request,'view_appts.html',context)
+
+def doctor_appt_delete(request, pk):
+    doctor_appt = get_object_or_404(PatientAppt,pk=pk)
+    if request.method=='POST':
+        doctor_appt.delete()
+	#First you need to get the current doctor to associate the doctor with the appts
+	current_doctor = Doctor.objects.filter(doctor_user=request.user)
+
+	if (Doctor.objects.filter(doctor_user = request.user).exists()):
+		current_doctor = Doctor.objects.filter(doctor_user = request.user).get()
+		relevant_appts = PatientAppt.objects.filter(doctor = current_doctor)
+		roles = PermissionsRole.objects.filter(user__username=request.user.username)[:1].get()
+
+
+	'''context = {
+
+		'current_doctor' : current_doctor,
+		'relevant_appts' : relevant_appts,
+		'roles'          : roles
+	}'''
+    return render(request,'doctor_scheduled_appointments.html')
