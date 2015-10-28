@@ -44,7 +44,8 @@ urlpatterns = [
     url(r'^accounts/portal/prescribe$', PrescribeMedicationView, name="PrescribeMedicationView"),
     url(r'^accounts/portal/hsp/approvals$', PatientApprovalView, name="PatientApprovalView"),
     url(r'^accounts/portal/hsp/approvals/approve$', ProcessPatientApproval, name="ProcessPatientApproval"),
+    url(r'^delete/(?P<pk>\d+)$', appt_delete, name='delete'),
+    url(r'^doctor_delete/(?P<pk>\d+)$', doctor_appt_delete, name='doctor_delete'),
 
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-

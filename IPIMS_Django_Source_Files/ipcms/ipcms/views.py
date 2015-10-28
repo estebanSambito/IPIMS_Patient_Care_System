@@ -2,7 +2,7 @@ from __future__ import absolute_import
 from django.views import generic
 from django.template import loader, Context
 from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse_lazy
 from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm
@@ -12,7 +12,7 @@ from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatie
 from django.shortcuts import render_to_response
 from .forms import PatientApptForm
 from django.template import RequestContext
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 
@@ -129,7 +129,7 @@ Sign up view used to register a user into the system
 class SignUpView(generic.CreateView):
 
 	form_class = RegistrationForm
-	model = User 
+	model = User
 	template_name = 'register.html'
 	success_url = reverse_lazy('Success')
 
@@ -227,7 +227,7 @@ def PatientPortalView(request):
 				patient.alertSent = 0
 				patient.save()
 
-			#If there health conditions are 
+			#If there health conditions are
 			if (total_health_condition_level < 40 and alert_sent == 1):
 				if Alert.objects.filter(alert_patient=patient)[:1].exists():
 					alert_model = Alert.objects.filter(alert_patient=patient)[:1].get()
@@ -237,7 +237,7 @@ def PatientPortalView(request):
 						patient.alertSent = 0
 						patient.save()
 
-			#If there health conditions are 
+			#If there health conditions are
 			if (total_health_condition_level > 40 and alert_sent == 1 and not Alert.objects.filter(alert_patient=patient)[:1].exists()):
 				if Alert.objects.filter(alert_patient=patient)[:1].exists():
 					patient.alertSent = 1
@@ -413,7 +413,7 @@ def HealthConditionsView(request):
 			instance = conditions_model.objects.filter(user=patient)[:1].get()
 			form = PatientHealthConditionsForm(instance=instance)
 			data_exists = True
-			
+
 	if request.method == "POST":
 
 		if conditions_model.objects.filter(user=patient)[:1].exists():
@@ -490,7 +490,7 @@ def PatientSearch(request):
 			'search_data': search_data_list,
 			'temp_user_data': patient_found,
 			'located': user_has_been_located
-		}			
+		}
 
 	return render(request, 'search.html', context)
 
@@ -526,7 +526,7 @@ def EmergencyAlerts(request):
 	patient_model = Patient
 	conditions_model = PatientHealthConditions
 	alert_model = Alert
-	
+
 	#Check to see if the user has logged into the system or not
 	if request.user.is_authenticated():
 
@@ -959,4 +959,44 @@ def logout_user(request):
 class SuccessFormPageView(generic.TemplateView):
 	template_name = 'accounts/formsuccess.html'
 
+def appt_delete(request, pk):
+	appt = get_object_or_404(PatientAppt,pk=pk)
+	if request.method=='POST':
+		appt.delete()
+	current_appts_list = []
+	#First you need to get the current patient to associate the patient with the appts
+	current_patient = Patient.objects.filter(user=request.user)[:1].get()
 
+	#Now you need to find all the appts that are associated with the current user who is logged in
+	if (PatientAppt.objects.filter(user=current_patient)[:1].exists()):
+		current_appts = PatientAppt.objects.filter(user=current_patient).all()
+		for appts in current_appts:
+			current_appts_list.append(appts)
+
+	context = {
+
+		'current_appts_list': current_appts_list,
+		'current_patient': current_patient
+	}
+	return render(request,'view_appts.html',context)
+
+def doctor_appt_delete(request, pk):
+    doctor_appt = get_object_or_404(PatientAppt,pk=pk)
+    if request.method=='POST':
+        doctor_appt.delete()
+	#First you need to get the current doctor to associate the doctor with the appts
+	current_doctor = Doctor.objects.filter(doctor_user=request.user)
+
+	if (Doctor.objects.filter(doctor_user = request.user).exists()):
+		current_doctor = Doctor.objects.filter(doctor_user = request.user).get()
+		relevant_appts = PatientAppt.objects.filter(doctor = current_doctor)
+		roles = PermissionsRole.objects.filter(user__username=request.user.username)[:1].get()
+
+
+	'''context = {
+
+		'current_doctor' : current_doctor,
+		'relevant_appts' : relevant_appts,
+		'roles'          : roles
+	}'''
+    return render(request,'doctor_scheduled_appointments.html')
