@@ -9,7 +9,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 class Doctor(models.Model):
 	doctor_first_name = models.CharField(max_length=256, default="")
 	doctor_last_name = models.CharField(max_length=256, default="")
-	doctor_type = models.CharField(max_length=256, choices=[('Gynecologist', 'Gynecologist'), ('Neurologist', 'Neurologist'), ('Therapist', 'Therapist'), ('Allergist', 'Allergist'), ('Cardiologist', 'Cardiologist'), ('Dermatologist', 'Dermatologist'), ('Oncologist', 'Oncologist'), ('ENT', 'ENT'), ('Plastic Surgeon', 'Plastic Surgeon'), ('Psychiatrist', 'Psychiatrist'), ('Urologist','Urologist'), ('Podiatrist', 'Podiatrist')], default="Select Doctor Type") 
+	doctor_type = models.CharField(max_length=256, choices=[('Gynecologist', 'Gynecologist'), ('Neurologist', 'Neurologist'), ('Therapist', 'Therapist'), ('Allergist', 'Allergist'), ('Cardiologist', 'Cardiologist'), ('Dermatologist', 'Dermatologist'), ('Oncologist', 'Oncologist'), ('ENT', 'ENT'), ('Plastic Surgeon', 'Plastic Surgeon'), ('Psychiatrist', 'Psychiatrist'), ('Urologist','Urologist'), ('Podiatrist', 'Podiatrist')], default="Select Doctor Type")
 	doctor_user = models.OneToOneField(User, unique=True, blank=False, default="", null=False)
 
 	def __unicode__(self):

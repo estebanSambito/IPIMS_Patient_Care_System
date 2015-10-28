@@ -14,7 +14,7 @@ from .forms import PatientApptForm
 from django.template import RequestContext
 from django.shortcuts import render
 from django.core.urlresolvers import reverse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 
 
 STAFF_APPROVAL_ROLES = ('admin', 'doctor', 'staff', 'nurse', 'lab')
@@ -24,7 +24,7 @@ STAFF_APPROVAL_ROLES = ('admin', 'doctor', 'staff', 'nurse', 'lab')
 def AlertSender(request):
 	#This method should be responsible for sending an alert to the doctor and HSP staff when the patient requests and alert to be sent
 
-	print 'inside alert sender'
+	print ('inside alert sender')
 	patient_model = Patient.objects.get(user__username=request.user.username)
 	health_conditions_model = PatientHealthConditions.objects.get(user=patient_model)
 	patient_data_information = TempPatientData.objects.get(user__username=request.user.username)
@@ -193,7 +193,7 @@ def PatientPortalView(request):
 
 		if patient_model.objects.filter(user__username=request.user.username)[:1].exists():
 			patient = patient_model.objects.filter(user__username=request.user.username)[:1].get()
-			print 'about to set alert sent'
+			print ('about to set alert sent')
 			if Alert.objects.filter(alert_patient=patient)[:1].exists():
 				alert_sent = 1
 				patient.alertSent = 1
@@ -577,7 +577,7 @@ def UpdateAccountView(request):
 
 			form.save()
 		else:
-			print form.errors
+			print (form.errors)
 		return HttpResponseRedirect('/accounts/portal/update_account/')
 
 
@@ -739,7 +739,7 @@ def PatientDataView(request):
 		if PatientAppt.objects.filter(doctor=current_doctor).count() == 0:
 			patients = 0
 		else:
-			print patients
+			print (patients)
 
 	context = {
 
@@ -779,7 +779,7 @@ def ResolvedPatientAjaxView(request):
 	if request.is_ajax() or request.method == 'POST':
 
 		primary_key_val = request.POST.get('appt_id')
-		print primary_key_val
+		print (primary_key_val)
 
 		if PatientAppt.objects.filter(pk=primary_key_val).exists():
 			current_appt = PatientAppt.objects.filter(pk=primary_key_val).get()
@@ -844,17 +844,17 @@ def MedicalHistoryView(request):
 	elif request.method == "POST" and 'pk_patient2' in request.POST:
 
 		patient_primary_key = request.POST.get('pk_patient2', '')
-		print patient_primary_key
+		print (patient_primary_key)
 
 		# current_patient = Patient.objects.filter(user_id=patient_primary_key).get()
 
 		if (Patient.objects.filter(id=patient_primary_key).exists()):
-			print 'EXISTS'
+			print ('EXISTS')
 			current_patient = Patient.objects.filter(id=patient_primary_key).get()
-			print 'assigned based on user key'
+			print ('assigned based on user key')
 		elif (Patient.objects.filter(pk=patient_primary_key).exists()):
 			current_patient = Patient.objects.filter(pk=patient_primary_key).get()
-			print 'assigned based on primary key'
+			print ('assigned based on primary key')
 
 		patient_appts = PatientAppt.objects.filter(user=current_patient).all()
 
