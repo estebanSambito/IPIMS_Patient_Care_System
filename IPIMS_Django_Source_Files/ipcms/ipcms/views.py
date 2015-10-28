@@ -20,11 +20,9 @@ from django.shortcuts import redirect
 STAFF_APPROVAL_ROLES = ('admin', 'doctor', 'staff', 'nurse', 'lab')
 
 
-
 def AlertSender(request):
 	#This method should be responsible for sending an alert to the doctor and HSP staff when the patient requests and alert to be sent
 
-	print 'inside alert sender'
 	patient_model = Patient.objects.get(user__username=request.user.username)
 	health_conditions_model = PatientHealthConditions.objects.get(user=patient_model)
 	patient_data_information = TempPatientData.objects.get(user__username=request.user.username)
@@ -36,8 +34,7 @@ def AlertSender(request):
 									health_conditions_model.body_ache_level+
 									health_conditions_model.chest_pain_level)
 
-	# print 'The current user that is being evaluated is ' + patient_data_information.user.username
-	# print 'The level of the health conditison for total is ' + str(total_health_condition_level)
+
 
 	#If this is a post method requested by the user, then execute the following logic
 	if request.method == 'POST':
@@ -193,7 +190,7 @@ def PatientPortalView(request):
 
 		if patient_model.objects.filter(user__username=request.user.username)[:1].exists():
 			patient = patient_model.objects.filter(user__username=request.user.username)[:1].get()
-			print 'about to set alert sent'
+
 			if Alert.objects.filter(alert_patient=patient)[:1].exists():
 				alert_sent = 1
 				patient.alertSent = 1
@@ -294,8 +291,7 @@ def PatientPortalView(request):
 			return HttpResponseRedirect('formsuccess')
 
 	#Get an array for allergies
-
-	if not request.user.username == "admin" and approval == 1 and not permissionRoleForUser.role == 'doctor':
+	if not request.user.username == "admin" and approval == 1 and permissionRoleForUser.role == 'patient':
 
 		if tempUserInformation.allergies is not None:
 			allergens = tempUserInformation.allergies.split(",")
@@ -305,7 +301,6 @@ def PatientPortalView(request):
 	else:
 		allergens = ""
 		med_conditions =""
-
 
 	alerts_count = Alert.objects.all().count()
 
@@ -328,6 +323,21 @@ def PatientPortalView(request):
 		if (Patient.objects.filter(fill_from_application=tempUserInformation).exists()):
 			current_patient = Patient.objects.filter(fill_from_application=tempUserInformation).get()
 
+	#Query all the people that have alert sent
+	get_all_unapproved_patients = TempPatientData.objects.filter(data_sent=1).all()
+
+	unapproved_patient_list = []
+	temp_patient_data_list = []
+
+
+
+	for each_patient in get_all_unapproved_patients:
+		if (not Patient.objects.filter(fill_from_application = each_patient).exists()):
+			unapproved_patient_list.append(each_patient)
+
+	unapproved_count = len(unapproved_patient_list)
+
+
 	context = {
 
 		'form': form,
@@ -344,7 +354,10 @@ def PatientPortalView(request):
 		'alerts_count':alerts_count,
 		'doc_name' : doc_name,
 		'appts' : appts,
-		'current_patient' : current_patient
+		'current_patient' : current_patient,
+		'unapproved_patient_list' : unapproved_patient_list,
+		'unapproved_count' : unapproved_count
+
 	}
 
 	return render(request, 'portal.html', context)
@@ -849,12 +862,9 @@ def MedicalHistoryView(request):
 		# current_patient = Patient.objects.filter(user_id=patient_primary_key).get()
 
 		if (Patient.objects.filter(id=patient_primary_key).exists()):
-			print 'EXISTS'
 			current_patient = Patient.objects.filter(id=patient_primary_key).get()
-			print 'assigned based on user key'
 		elif (Patient.objects.filter(pk=patient_primary_key).exists()):
 			current_patient = Patient.objects.filter(pk=patient_primary_key).get()
-			print 'assigned based on primary key'
 
 		patient_appts = PatientAppt.objects.filter(user=current_patient).all()
 
@@ -893,13 +903,53 @@ def PrescribeMedicationView(request):
 		return HttpResponseRedirect('formsuccess')
 
 
-
 	context = {
 		"form": form,
 		"template_title": title,
 	}
 	return render(request, 'prescribe.html', context)
 
+def ProcessPatientApproval(request):
+
+	#Query the temp_patient_data from the primary key
+	if request.method == "POST" and 'pk_pending' in request.POST:
+		primary_key_val = request.POST.get('pk_pending', '')
+		print primary_key_val
+		temp_object = TempPatientData.objects.filter(user_id=primary_key_val).get()
+
+		#Create a new patient object 
+		p = Patient.objects.create(fill_from_application=temp_object, user=temp_object.user, approved=1, alertSent=0)
+		p.save()
+
+		r = PermissionsRole.objects.create(role='patient', user=temp_object.user)
+		r.save()
+
+
+	return HttpResponseRedirect(reverse("PatientApprovalView"))
+
+def PatientApprovalView(request):
+
+	#Query all the people that have alert sent
+	get_all_unapproved_patients = TempPatientData.objects.filter(data_sent=1).all()
+
+	unapproved_patient_list = []
+	temp_patient_data_list = []
+
+
+	for each_patient in get_all_unapproved_patients:
+		if (not Patient.objects.filter(fill_from_application = each_patient).exists()):
+			unapproved_patient_list.append(each_patient)
+
+	unapproved_count = len(unapproved_patient_list)
+
+	context = {
+
+		'unapproved_patient_list' : unapproved_patient_list,
+		'size_of' : len(unapproved_patient_list)
+
+	}
+
+	return render(request, 'approval1.html', context)
 
 def logout_user(request):
 	logout(request)

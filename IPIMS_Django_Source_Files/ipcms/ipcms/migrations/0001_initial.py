@@ -33,6 +33,13 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='EMedication',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('medication_name', models.CharField(default=b'', max_length=255)),
+            ],
+        ),
+        migrations.CreateModel(
             name='Patient',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -119,6 +126,11 @@ class Migration(migrations.Migration):
             model_name='patient',
             name='user',
             field=models.OneToOneField(null=True, default=b'', blank=True, to=settings.AUTH_USER_MODEL),
+        ),
+        migrations.AddField(
+            model_name='emedication',
+            name='patient',
+            field=models.OneToOneField(default=b'', to='ipcms.Patient'),
         ),
         migrations.AddField(
             model_name='alert',

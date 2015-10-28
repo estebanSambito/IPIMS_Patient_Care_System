@@ -42,7 +42,9 @@ urlpatterns = [
     url(r'^accounts/portal/admin/resolve_patient_case$', ResolvedPatientAjaxView, name="ResolvedPatientAjaxView"),
     url(r'^accounts/portal/medical_history$', MedicalHistoryView, name="MedicalHistoryView"),
     url(r'^accounts/portal/prescribe$', PrescribeMedicationView, name="PrescribeMedicationView"),
-    
+    url(r'^accounts/portal/hsp/approvals$', PatientApprovalView, name="PatientApprovalView"),
+    url(r'^accounts/portal/hsp/approvals/approve$', ProcessPatientApproval, name="ProcessPatientApproval"),
+
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
