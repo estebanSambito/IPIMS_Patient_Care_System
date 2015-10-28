@@ -28,9 +28,11 @@
 				         	<input type="submit" class="btn-sm" value="View Patient Case"> 
 				         	<input type="hidden" name="pk_patient" value={{alert.alert_patient.pk}}>
 				         </form>
+				  	
 				  	<hr>
 
-					    <form id ="checker{{appts.pk}}" method = "POST" action='/accounts/portal/admin/resolve_patient_case'>
+				  	
+					    <form id ="checker{{alert.alert_patient.pk}}" method = "POST" action='/accounts/portal/view_alerts/'>
 					    {% csrf_token %}
 						<input type="submit" class="resolver" value="Remove Alert"><i class="icon-chevron-right"></i></a>
 							<input type="hidden" name="appt_id" value={{alert.alert_patient.pk}}>
