@@ -44,6 +44,7 @@ urlpatterns = [
     url(r'^accounts/portal/prescribe$', PrescribeMedicationView, name="PrescribeMedicationView"),
     url(r'^delete/(?P<pk>\d+)$', appt_delete, name='delete'),
     url(r'^doctor_delete/(?P<pk>\d+)$', doctor_appt_delete, name='doctor_delete'),
+    url(r'^accounts/portal/uploadMedicalReportView$', uploadMedicalReportView, name="med_view"),
 
 
 
