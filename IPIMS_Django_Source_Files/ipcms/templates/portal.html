@@ -254,7 +254,33 @@
   <div class = 'col-md-4'></div>
   <div class = 'col-md-4'>
     <a href="#" class="btn">Upload Medical Reports</a><br><br>
-    <a href="#" class="btn">Generate Stats Report</a><br><br>
+    <a href="#" class="btn">Update Medical History</a><br><br>
+    <a href="#" class="btn">Retrieve Medical Information</a><br><br>
+    <a href="#" class="btn">Statistical Report Analysis</a><br><br>
+    <h3>Search For Patient In Database</h3>
+
+     <form method="POST" action="/search/">
+         {% csrf_token %}
+
+           <center>
+             <input id="address" type="textbox" placeholder="Search For Patient In Database" class="form-control fixedtest" name="search_data">
+           </center>
+
+           <span class="input-group-btn">
+             <button class="btn btn-info bigger-width" type="submit" id="addressSearch">Search</button>
+           </span>
+
+          <br><b>- Search Options - </b> <br>
+         <input type="radio" name="db_search_type" value="firstlast" checked="true">    First + Last name</input><br>
+         <input type="radio" name="db_search_type" value="email">    Email Address</input>
+     </form>
+
+     <br>
+     <br>
+
+     </div>
+     <div class = 'col-md-4'></div>
+
     {% endif %}
   {% if roles.role == "doctor" %}
 
