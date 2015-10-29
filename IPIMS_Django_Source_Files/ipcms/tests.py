@@ -268,7 +268,7 @@ class TestApptDelete(TestCase):
 #doctor_last_name
 #doctor_type
 #doctor_user
-		temp_patient_appt = PatientAppt.objects.create()
+		temp_patient_appt = PatientAppt.objects.create()#....i think its this
 		temp_patient_appt.user = User.objects.create(username="johnson", email="johnson@johnson.com", password="johnson")
 		#temp_patient_appts.doctor= Doctor.object.create()
 		temp_patient_appt.date = "10/30/2015"
