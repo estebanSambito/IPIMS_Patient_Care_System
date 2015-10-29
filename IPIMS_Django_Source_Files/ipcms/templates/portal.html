@@ -19,7 +19,7 @@
 
     <!-- Custom styles for this template -->
     <link href="{% static 'css/main.css' %}" rel="stylesheet">
-  
+
 
     <link href="{% static 'css/card.css' %}" rel="stylesheet">
 
@@ -118,7 +118,7 @@
 
 <div class="box10">
   <h5><center>IPIMS Identification Card</center></h5>
-       <h1>{{temp_user_data.first_name|title}} {{temp_user_data.last_name|title}}</h1>   
+       <h1>{{temp_user_data.first_name|title}} {{temp_user_data.last_name|title}}</h1>
        <img src="http://4.bp.blogspot.com/-zsbDeAUd8aY/US7F0ta5d9I/AAAAAAAAEKY/UL2AAhHj6J8/s1600/facebook-default-no-profile-pic.jpg"><br>
        <a href="#">Click Here To Change/Update Profile Photo</a>
           <p>
@@ -145,7 +145,7 @@
             <li>{{x}}</li>
             {% endfor %}
           </ul>
-    
+
        <br />
        <b><a href="/accounts/portal/update_account/">Update Your IPIMS Contact Card</a></b>
 </div>
@@ -224,7 +224,7 @@
 </div><!-- container -->
 
 <div class = "container">
-  
+
   {% if user.username == "admin" %}
 
     <a href="#" class="btn">Create Approved Patient</a><br><br>
@@ -250,7 +250,12 @@
   </form> <br><br>
 
   {% endif %}
-
+  {% if roles.role == "staff" %}
+  <div class = 'col-md-4'></div>
+  <div class = 'col-md-4'>
+    <a href="#" class="btn">Upload Medical Reports</a><br><br>
+    <a href="#" class="btn">Generate Stats Report</a><br><br>
+    {% endif %}
   {% if roles.role == "doctor" %}
 
   <div class = 'col-md-4'>
@@ -280,7 +285,7 @@
        <br><b>- Search Options - </b> <br>
       <input type="radio" name="db_search_type" value="firstlast" checked="true">    First + Last name</input><br>
       <input type="radio" name="db_search_type" value="email">    Email Address</input>
-  </form> 
+  </form>
 
   <br>
   <br>
@@ -302,14 +307,14 @@
 			</div><!-- row -->
 		</div><!-- container -->
 	</div>
-	
-	
+
+
 	<!-- FOOTER -->
 	<div id="f">
 		<div class="container">
 			<div class="row centered">
 				IPIMS Solutions - 2015
-		
+
 			</div><!-- row -->
 		</div><!-- container -->
 	</div><!-- Footer -->
@@ -346,7 +351,7 @@
         </div>
       </div>
     </div>
-  </div> 
+  </div>
 
     <!-- Bootstrap core JavaScript
     ================================================== -->

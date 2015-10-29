@@ -45,4 +45,6 @@ urlpatterns = [
     url(r'^delete/(?P<pk>\d+)$', appt_delete, name='delete'),
     url(r'^doctor_delete/(?P<pk>\d+)$', doctor_appt_delete, name='doctor_delete'),
 
+
+
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

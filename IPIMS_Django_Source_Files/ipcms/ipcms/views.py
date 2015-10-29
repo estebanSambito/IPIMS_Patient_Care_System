@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse_lazy
-from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm
+from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm, PatientMedicalReportForm
 from django.template import RequestContext
 from django.views.generic import ListView
 from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication, patientMedicalReport
@@ -957,60 +957,57 @@ def doctor_appt_delete(request, pk):
 	return render(request,'doctor_scheduled_appointments.html',context)
 
 	def uploadMedicalReportView(request,pk):
-	user_has_been_located = False
+		user_has_been_located = False
 
-	patient_model = Patient #Perform queries on the database model that holds all the patient information
+		patient_model = Patient #Perform queries on the database model that holds all the patient information
 
-	search_data_list = ""
+		search_data_list = ""
 
-	patient_found = ''
+		patient_found = ''
 
 	#Grab the post param information so that you can perform iteration logic through the database on the searchable customer
-	if request.method == "POST":
-		search_data = request.POST.get("search_data", "") #store the data of the user search information into a variable that you can parse
-		db_search_type = request.POST.get("db_search_type", "")
+		if request.method == "POST":
+			search_data = request.POST.get("search_data", "") #store the data of the user search information into a variable that you can parse
+			db_search_type = request.POST.get("db_search_type", "")
 
-		search_data_list = search_data.split(" ") #If there is more than one entry in the search bar, parse it as necessary
+			search_data_list = search_data.split(" ") #If there is more than one entry in the search bar, parse it as necessary
 
 		#Check to see if the inputted email matches any of the patient emails in the databases
-'''
-		if db_search_type == "email":
-			if patient_model.objects.filter(fill_from_application__email_address__iexact=search_data_list[0]).exists():
-				patient_found = patient_model.objects.filter(fill_from_application__email_address__iexact=search_data_list[0]).get()
-				search_data_list.append(patient_found)
-				user_has_been_located = True
-'''
+
 		elif db_search_type == "firstlast":
 			if patient_model.objects.filter(fill_from_application__first_name__iexact=search_data_list[0]).exists() and patient_model.objects.filter(fill_from_application__last_name__iexact=search_data_list[1]).exists():
 				patient_found = patient_model.objects.filter(fill_from_application__first_name__iexact=search_data_list[0], fill_from_application__last_name__iexact=search_data_list[1]).all()
 				search_data_list.append(patient_found)
 				user_has_been_located = True
 
-	if search_data_list == "":
+		if search_data_list == "":
 
-		context = {
+			context = {
 
 			'search_data': 'none',
 			'located': user_has_been_located
-		}
+			}
 
-	elif user_has_been_located == True:
+		elif user_has_been_located == True:
 
 
-		context = {
-
-			'search_data': search_data_list,
-			'temp_user_data': patient_found,
-			'located': user_has_been_located
-		}
-
-	else:
-
-		context = {
+			context = {
 
 			'search_data': search_data_list,
 			'temp_user_data': patient_found,
 			'located': user_has_been_located
-		}
+			}
+
+		else:
+
+			context = {
+
+			'search_data': search_data_list,
+			'temp_user_data': patient_found,
+			'located': user_has_been_located
+			}
+
+			title = "Medical Report Form"
+			form = PatientMedicalReportForm(request.POST or None)
 
 	return render(request, 'search.html', context)

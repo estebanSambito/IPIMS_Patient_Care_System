@@ -2,7 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.forms import AuthenticationForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
-from .models import Patient, PatientAppt, PatientHealthConditions, TempPatientData, EMedication
+from .models import Patient, PatientAppt, PatientHealthConditions, TempPatientData, EMedication, patientMedicalReport
 from django.db import models
 from django import forms
 
@@ -83,7 +83,7 @@ class TempPatientDataForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['user', 'data_sent', 'email_address']
 
-class PatientMedicalReportForm(form.ModelForm):
+class PatientMedicalReportForm(forms.ModelForm):
     class Meta:
         widgets = {
             'first_name': forms.TextInput(attrs={'placeholder': 'Legal First Name'}),
