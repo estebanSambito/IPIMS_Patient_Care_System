@@ -42,9 +42,14 @@ urlpatterns = [
     url(r'^accounts/portal/admin/resolve_patient_case$', ResolvedPatientAjaxView, name="ResolvedPatientAjaxView"),
     url(r'^accounts/portal/medical_history$', MedicalHistoryView, name="MedicalHistoryView"),
     url(r'^accounts/portal/prescribe$', PrescribeMedicationView, name="PrescribeMedicationView"),
+<<<<<<< HEAD
     url(r'^accounts/portal/view_appts_data/(?P<pk>\d+)$', ApptDataView, name="ApptDataView"), 
     url(r'^accounts/portal/view_appts_edit/(?P<pk>\d+)$', ApptDataEdit, name="ApptDataEdit"),
     
+=======
+    url(r'^delete/(?P<pk>\d+)$', appt_delete, name='delete'),
+    url(r'^doctor_delete/(?P<pk>\d+)$', doctor_appt_delete, name='doctor_delete'),
+>>>>>>> refs/remotes/origin/develop
+
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-

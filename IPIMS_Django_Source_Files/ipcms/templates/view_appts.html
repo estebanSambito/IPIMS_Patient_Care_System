@@ -37,6 +37,7 @@
 				{{appts.medical_conditions|title}}
 				</td>
 				<td>{{appts.date}}</td>
+<<<<<<< HEAD
 				<td>
 					<form action="{% url 'ApptDataView' appts.id %}" 	method="POST"> 
 					    {% csrf_token %}
@@ -44,6 +45,15 @@
 					</form>
 				</td>
 				<td>Cancel</td>
+=======
+				<td>Revise</td>
+				<td>
+					<form action="{% url 'delete' appts.id %}" method="POST">
+							{% csrf_token %}
+							<input type="submit" value="Cancel" />
+					</form>
+				</td>
+>>>>>>> refs/remotes/origin/develop
 
 			</tr>
 		{% endif %}
