@@ -15,6 +15,7 @@ from django.template import RequestContext
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
+import datetime
 
 
 STAFF_APPROVAL_ROLES = ('admin', 'doctor', 'staff', 'nurse', 'lab')
@@ -181,7 +182,6 @@ def PatientPortalView(request):
 
 	total_health_condition_level = 0
 
-
 	#If user has already sent an alert request
 	alert_sent = 0
 
@@ -336,6 +336,19 @@ def PatientPortalView(request):
 			unapproved_patient_list.append(each_patient)
 
 	unapproved_count = len(unapproved_patient_list)
+
+	if not permissionRoleForUser == "pending":
+		if permissionRoleForUser.role == 'patient':
+			patient_date_time_set = Patient.objects.filter(fill_from_application__user=request.user).get()
+			print patient_date_time_set.date_created
+			if patient_date_time_set.date_created == '9-20-1995':
+				d = datetime.date.today()
+				user_date_add = datetime.datetime.now()
+				print ' is now'
+				patient_date_time_set.date_created = user_date_add
+				patient_date_time_set.save()
+				print patient_date_time_set.date_created
+				print 'SET'
 
 
 	context = {
@@ -709,6 +722,29 @@ def GenerateStatsView(request):
 		resolved_cases = 0
 		unresolved_cases = 0
 
+
+	#QUERY ALL THE MOST RECENT PATIENT WITHIN THE LAST 30 DAYS
+
+	today = datetime.date.today()
+	thirty_days_ago = today - datetime.timedelta(days=30)
+	entries = Patient.objects.filter(date_created__gte=thirty_days_ago)
+	accepted_count_last_30_days = 0
+	all_accepted = 0
+	all_denied = 0
+
+	staff_roles = PermissionsRole.objects.exclude(role="patient").count()
+
+	patient = Patient.objects.filter(approved=1).all()
+	
+	for patients in patient:
+		all_accepted+=1
+
+
+	for entry in entries:
+		accepted_count_last_30_days+=1
+
+	print 'Accepted: %d and accepted_count_last_30_days: %d\n' %(all_accepted, accepted_count_last_30_days)
+
 	context = {
 
 		'roles' : roles,
@@ -735,7 +771,10 @@ def GenerateStatsView(request):
 		'age_3' : age_3,
 		'age_4' : age_4,
 		'unresolved_cases' : unresolved_cases,
-		'resolved_cases' : resolved_cases
+		'resolved_cases' : resolved_cases,
+		'accepted_count_last_30_days' : accepted_count_last_30_days,
+		'all_accepted' : all_accepted,
+		'staff_roles' : staff_roles
 	}
 
 	return render(request, 'stats.html', context)
@@ -833,7 +872,7 @@ def MedicalHistoryView(request):
 
 		patient_primary_key = request.POST.get('pk_patient', '')
 
-		patient_appts = PatientAppt.objects.filter(pk=patient_primary_key).all()
+		patient_appts = PatientAppt.objects.filter(user_id=patient_primary_key).all()
 
 		patient_obj = patient_appts[0].user
 
@@ -856,7 +895,7 @@ def MedicalHistoryView(request):
 
 	elif request.method == "POST" and 'pk_patient2' in request.POST:
 
-		patient_primary_key = request.POST.get('pk_patient2', '1')
+		patient_primary_key = request.POST.get('pk_patient2', '')
 		print patient_primary_key
 
 		# current_patient = Patient.objects.filter(user_id=patient_primary_key).get()

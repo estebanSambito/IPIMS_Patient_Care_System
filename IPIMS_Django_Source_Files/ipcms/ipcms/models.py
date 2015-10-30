@@ -3,7 +3,7 @@ from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-
+import datetime
 
 #This class will also contain the list of names of the doctors who work for the hospital
 class Doctor(models.Model):
@@ -55,6 +55,8 @@ class Patient(models.Model):
 	user = models.OneToOneField(User, unique=True,  blank=True, default="", null=True)
 	approved = models.IntegerField(default=0, null=False)
 	alertSent = models.IntegerField(default=0, null=False)
+	date_created = models.CharField(default="9-20-1995", null=True, max_length=20)
+
 
 	def __unicode__(self):
 		return str(self.user)

@@ -25,6 +25,7 @@ class AlertAdmin(admin.ModelAdmin):
 
 class PatientAdmin(admin.ModelAdmin):
 	list_display=('user', 'alertSent')
+	# readonly_fields = ('created',)
 
 class EMedicationAdmin(admin.ModelAdmin):
 	list_display=('patient', 'medication_name')
