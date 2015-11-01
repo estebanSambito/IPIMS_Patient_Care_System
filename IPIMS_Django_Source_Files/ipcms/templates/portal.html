@@ -299,8 +299,8 @@
 
      </div>
      <div class = 'col-md-4'></div> -->
-<!-- 
-    {% endif %} --> 
+<!--
+    {% endif %} -->
   {% if roles.role == "doctor" %}
 
   <div class = 'col-md-4'>
@@ -350,6 +350,7 @@
 
     <!-- <a href="/accounts/portal/view_alerts" class="btn btn-red">Click To View All Alerts<br><i>{{alerts_count}} Emergency Alert(s)!</i></a><br><br> -->
     <a href="/accounts/portal/hsp/approvals" class="btn">Application Approvals<br></a><br>({{unapproved_count}} people waiting for application approval)<br><br>
+    <a href="/accounts/portal/admin/create_medical_report" class="btn">Patient Medical Report</a><br><br>
     <a href="/accounts/portal/admin/generate" class="btn">View Patient Data</a><br><br>
     <!-- <a href="/accounts/portal/admin/generate" class="btn">Emergency Alerts</a><br><br> -->
     <a href="/accounts/portal/admin/generate" class="btn">Generate Stats Report</a><br><br>
@@ -370,7 +371,7 @@
        <br><b>- Search Options - </b> <br>
       <input type="radio" name="db_search_type" value="firstlast" checked="true">    First + Last name</input><br>
       <input type="radio" name="db_search_type" value="email">    Email Address</input>
-  </form> 
+  </form>
 
   </div>
   {% endif %}

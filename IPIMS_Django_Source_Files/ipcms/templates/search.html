@@ -36,7 +36,7 @@
 			<div class="box10 col-sm-10">
 			  <h5><center>IPIMS Identification Card</center></h5>
 
-			       <h1>{{item.fill_from_application.first_name|title}} {{item.fill_from_application.last_name|title}}</h1>   
+			       <h1>{{item.fill_from_application.first_name|title}} {{item.fill_from_application.last_name|title}}</h1>
 			       <form action = "/delete/" method="POST">
 			       	{% csrf_token %}
 			       	<input type="hidden" name="pk" value="{{item.id}}">
@@ -52,7 +52,7 @@
 			         <b>DOB: </b>{{item.fill_from_application.DOB}}<br>
 			         <b>Insurance Provider: </b>{{item.fill_from_application.insurance_provider}}<br>
 			         <b>Policy Number:</b> {{item.fill_from_application.insurance_policy_number}}<br>
-			        <p>    
+			        <p>
 			       <br />
 			       <b><a href="#">Update Your IPIMS Contact Card</a></b>
 			</div>
@@ -68,13 +68,12 @@
 			<div class="box10 col-sm-10">
 			  <h5><center>IPIMS Identification Card</center></h5>
 
-			       <h1>{{temp_user_data.fill_from_application.first_name|title}} {{temp_user_data.fill_from_application.last_name|title}}</h1>   
+			       <h1>{{temp_user_data.fill_from_application.first_name|title}} {{temp_user_data.fill_from_application.last_name|title}}</h1>
 			       <form action = "/delete/" method="POST">
 			       	{% csrf_token %}
 			       	<input type="hidden" name="pk" value="{{temp_user_data.id}}">
 			       	<button type="submit">Delete {{temp_user_data.fill_from_application.first_name|title}} {{temp_user_data.fill_from_application.last_name|title}}</button>
 			       </form>
-
 			       <img src="http://4.bp.blogspot.com/-zsbDeAUd8aY/US7F0ta5d9I/AAAAAAAAEKY/UL2AAhHj6J8/s1600/facebook-default-no-profile-pic.jpg">
 			          <p>
 			         <b>E-Mail Address:</b> {{temp_user_data.fill_from_application.email_address}}<br>
@@ -84,7 +83,7 @@
 			         <b>DOB: </b>{{temp_user_data.fill_from_application.DOB}}<br>
 			         <b>Insurance Provider: </b>{{temp_user_data.fill_from_application.insurance_provider}}<br>
 			         <b>Policy Number:</b> {{temp_user_data.fill_from_application.insurance_policy_number}}<br>
-			        <p>    
+			        <p>
 			       <br />
 			       <b><a href="#">Update Your IPIMS Contact Card</a></b>
 			</div>
@@ -100,4 +99,3 @@
 {% endif %}
 
 {% endblock %}
-

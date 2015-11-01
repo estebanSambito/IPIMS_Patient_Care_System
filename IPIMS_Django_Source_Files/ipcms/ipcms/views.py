@@ -5,10 +5,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse_lazy
-from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm, LabReportForm
+from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm, LabReportForm, PatientMedicalReportForm
 from django.template import RequestContext
 from django.views.generic import ListView
-from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication, LabReport
+from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication, LabReport, PatientMedicalReport
 from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm
 from django.template import RequestContext
 from django.views.generic import ListView
@@ -350,22 +350,22 @@ def PatientPortalView(request):
 	if not permissionRoleForUser == "pending":
 		if permissionRoleForUser.role == 'patient':
 			patient_date_time_set = Patient.objects.filter(fill_from_application__user=request.user).get()
-			print patient_date_time_set.date_created
+			print (patient_date_time_set.date_created)
 			if patient_date_time_set.date_created == '9-20-1995':
 				d = datetime.date.today()
 				user_date_add = datetime.datetime.now()
-				print ' is now'
+				print (' is now')
 				patient_date_time_set.date_created = user_date_add
 				patient_date_time_set.save()
-				print patient_date_time_set.date_created
-				print 'SET'
+				print (patient_date_time_set.date_created)
+				print ('SET')
 
 	if not permissionRoleForUser == "pending":
 		if permissionRoleForUser.role == 'patient':
 
 			#Query the medication pickups for the patient
 			medications_for_patient = EMedication.objects.filter(reminder=0, patient__user=request.user).all()
-			print medications_for_patient
+			print (medications_for_patient)
 
 			if len(medications_for_patient) == 0:
 				medications_for_patient = "No Medications Pending"
@@ -781,7 +781,7 @@ def GenerateStatsView(request):
 	staff_roles = PermissionsRole.objects.exclude(role="patient").count()
 
 	patient = Patient.objects.filter(approved=1).all()
-	
+
 	for patients in patient:
 		all_accepted+=1
 
@@ -789,7 +789,7 @@ def GenerateStatsView(request):
 	for entry in entries:
 		accepted_count_last_30_days+=1
 
-	print 'Accepted: %d and accepted_count_last_30_days: %d\n' %(all_accepted, accepted_count_last_30_days)
+	print ('Accepted: %d and accepted_count_last_30_days: %d\n' %(all_accepted, accepted_count_last_30_days))
 
 	context = {
 
@@ -931,8 +931,8 @@ def MedicalHistoryView(request):
 
 		patient_primary_key = request.POST.get('pk_patient', '')
 
-		print patient_primary_key
-		print 'is the primary key'
+		print (patient_primary_key)
+		print ('is the primary key')
 
 		patient_appts = PatientAppt.objects.filter(id=patient_primary_key).all()
 
@@ -947,8 +947,8 @@ def MedicalHistoryView(request):
 		medications = medications.split(',')
 
 		doc_meds = EMedication.objects.filter(patient=patient_obj).all()
-		print 'The doc meds are',
-		print doc_meds
+		print ('The doc meds are'),
+		print (doc_meds)
 
 		context = {
 
@@ -997,8 +997,8 @@ def MedicalHistoryView(request):
 		medications = medications.split(',')
 
 		doc_meds = EMedication.objects.filter(patient=current_patient).all()
-		print 'The doc meds are',
-		print doc_meds
+		print ('The doc meds are'),
+		print (doc_meds)
 
 
 		context = {
@@ -1037,10 +1037,10 @@ def ProcessPatientApproval(request):
 	#Query the temp_patient_data from the primary key
 	if request.method == "POST" and 'pk_pending' in request.POST:
 		primary_key_val = request.POST.get('pk_pending', '')
-		print primary_key_val
+		print (primary_key_val)
 		temp_object = TempPatientData.objects.filter(user_id=primary_key_val).get()
 
-		#Create a new patient object 
+		#Create a new patient object
 		p = Patient.objects.create(fill_from_application=temp_object, user=temp_object.user, approved=1, alertSent=0)
 		p.save()
 
@@ -1169,7 +1169,7 @@ def display_all_lab_results(request):
 
 	all_lab_tests = LabReport.objects.all()
 
-	print all_lab_tests
+	print (all_lab_tests)
 
 	context = {
 
@@ -1206,8 +1206,8 @@ def edit_lab_results(request):
 
 		model_instance = LabReport.objects.get(pk=lab_found)
 
-		print 'The current lab model that has been found is: \n'
-		print model_instance
+		print ('The current lab model that has been found is: \n')
+		print (model_instance)
 
 		primary_key_val = model_instance
 
@@ -1262,4 +1262,16 @@ def FAQView(request):
 
 	# }
 	# return render(request,'doctor_scheduled_appointments.html',context)
+def PatientMedicalReportView(request):
 
+	title = "Patient Medical Report Creation Form"
+	form = PatientMedicalReportForm(request.POST or None)
+	if form.is_valid():
+		instance = form.save(commit=False)
+		instance.save()
+		return HttpResponseRedirect('formsuccess')
+	context = {
+		"form": form,
+		"template_title": title,
+	}
+	return render(request, 'create_medical_report.html', context)
