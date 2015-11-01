@@ -5,16 +5,16 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse_lazy
-from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm
+from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm, PatientMedicalReportForm
 from django.template import RequestContext
 from django.views.generic import ListView
-from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication
+from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication, patientMedicalReport
 from django.shortcuts import render_to_response
 from .forms import PatientApptForm
 from django.template import RequestContext
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404,redirect
 from django.core.urlresolvers import reverse
-from django.shortcuts import redirect
+#from django.shortcuts import redirect, get_object_or_404
 
 
 STAFF_APPROVAL_ROLES = ('admin', 'doctor', 'staff', 'nurse', 'lab')
@@ -24,7 +24,7 @@ STAFF_APPROVAL_ROLES = ('admin', 'doctor', 'staff', 'nurse', 'lab')
 def AlertSender(request):
 	#This method should be responsible for sending an alert to the doctor and HSP staff when the patient requests and alert to be sent
 
-	print 'inside alert sender'
+	print ('inside alert sender')
 	patient_model = Patient.objects.get(user__username=request.user.username)
 	health_conditions_model = PatientHealthConditions.objects.get(user=patient_model)
 	patient_data_information = TempPatientData.objects.get(user__username=request.user.username)
@@ -193,7 +193,7 @@ def PatientPortalView(request):
 
 		if patient_model.objects.filter(user__username=request.user.username)[:1].exists():
 			patient = patient_model.objects.filter(user__username=request.user.username)[:1].get()
-			print 'about to set alert sent'
+			print ('about to set alert sent')
 			if Alert.objects.filter(alert_patient=patient)[:1].exists():
 				alert_sent = 1
 				patient.alertSent = 1
@@ -577,7 +577,7 @@ def UpdateAccountView(request):
 
 			form.save()
 		else:
-			print form.errors
+			print (form.errors)
 		return HttpResponseRedirect('/accounts/portal/update_account/')
 
 
@@ -761,7 +761,7 @@ def PatientDataView(request):
 		if PatientAppt.objects.filter(doctor=current_doctor).count() == 0:
 			patients = 0
 		else:
-			print patients
+			print (patients)
 
 	context = {
 
@@ -801,7 +801,7 @@ def ResolvedPatientAjaxView(request):
 	if request.is_ajax() or request.method == 'POST':
 
 		primary_key_val = request.POST.get('appt_id')
-		print primary_key_val
+		print (primary_key_val)
 
 		if PatientAppt.objects.filter(pk=primary_key_val).exists():
 			current_appt = PatientAppt.objects.filter(pk=primary_key_val).get()
@@ -865,18 +865,23 @@ def MedicalHistoryView(request):
 
 	elif request.method == "POST" and 'pk_patient2' in request.POST:
 
+
+		patient_primary_key = request.POST.get('pk_patient2', '')
+		print (patient_primary_key)
+
 		patient_primary_key = request.POST.get('pk_patient2', '1')
-		print patient_primary_key
+		print (patient_primary_key)
+
 
 		# current_patient = Patient.objects.filter(user_id=patient_primary_key).get()
 
 		if (Patient.objects.filter(id=patient_primary_key).exists()):
-			print 'EXISTS'
+			print ('EXISTS')
 			current_patient = Patient.objects.filter(id=patient_primary_key).get()
-			print 'assigned based on user key'
+			print ('assigned based on user key')
 		elif (Patient.objects.filter(pk=patient_primary_key).exists()):
 			current_patient = Patient.objects.filter(pk=patient_primary_key).get()
-			print 'assigned based on primary key'
+			print ('assigned based on primary key')
 
 		patient_appts = PatientAppt.objects.filter(user=current_patient).all()
 
@@ -953,9 +958,9 @@ def appt_delete(request, pk):
 	return render(request,'view_appts.html',context)
 
 def doctor_appt_delete(request, pk):
-    doctor_appt = get_object_or_404(PatientAppt,pk=pk)
-    if request.method=='POST':
-        doctor_appt.delete()
+	doctor_appt = get_object_or_404(PatientAppt,pk=pk)
+	if request.method=='POST':
+		doctor_appt.delete()
 	#First you need to get the current doctor to associate the doctor with the appts
 	current_doctor = Doctor.objects.filter(doctor_user=request.user)
 
@@ -965,10 +970,66 @@ def doctor_appt_delete(request, pk):
 		roles = PermissionsRole.objects.filter(user__username=request.user.username)[:1].get()
 
 
-	'''context = {
+	context = {
 
 		'current_doctor' : current_doctor,
 		'relevant_appts' : relevant_appts,
 		'roles'          : roles
-	}'''
-    return render(request,'doctor_scheduled_appointments.html')
+	}
+	return render(request,'doctor_scheduled_appointments.html',context)
+
+def uploadMedicalReportView(request,pk):
+	user_has_been_located = False
+
+	patient_model = Patient #Perform queries on the database model that holds all the patient information
+
+	search_data_list = ""
+
+	patient_found = ''
+
+#Grab the post param information so that you can perform iteration logic through the database on the searchable customer
+	if request.method == "POST":
+		search_data = request.POST.get("search_data", "") #store the data of the user search information into a variable that you can parse
+		db_search_type = request.POST.get("db_search_type", "")
+
+		search_data_list = search_data.split(" ") #If there is more than one entry in the search bar, parse it as necessary
+
+	#Check to see if the inputted email matches any of the patient emails in the databases
+
+	elif db_search_type == "firstlast":
+		if patient_model.objects.filter(fill_from_application__first_name__iexact=search_data_list[0]).exists() and patient_model.objects.filter(fill_from_application__last_name__iexact=search_data_list[1]).exists():
+			patient_found = patient_model.objects.filter(fill_from_application__first_name__iexact=search_data_list[0], fill_from_application__last_name__iexact=search_data_list[1]).all()
+			search_data_list.append(patient_found)
+			user_has_been_located = True
+
+	if search_data_list == "":
+
+		context = {
+
+		'search_data': 'none',
+		'located': user_has_been_located
+		}
+
+	elif user_has_been_located == True:
+
+
+		context = {
+
+		'search_data': search_data_list,
+		'temp_user_data': patient_found,
+		'located': user_has_been_located
+		}
+
+	else:
+
+		context = {
+
+		'search_data': search_data_list,
+		'temp_user_data': patient_found,
+		'located': user_has_been_located
+		}
+
+		title = "Medical Report Form"
+		form = PatientMedicalReportForm(request.POST or None)
+
+		return render(request, 'portal.html', context)
