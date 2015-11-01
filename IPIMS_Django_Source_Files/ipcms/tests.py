@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.test.client import Client
 from ipcms.models import TempPatientData, Doctor, Patient, PatientHealthConditions, PatientAppt, Alert
 from pprint import pprint
-from django.shortcuts import redirect, get_object_or_404
 
 #This will be used to prepare the creation of the users within the system
 # class TestingDifferentUserCreations(TestCase):
@@ -54,7 +53,7 @@ from django.shortcuts import redirect, get_object_or_404
 	# 	temp_doctor_object = Doctor.objects.create()
 	# 	print 'The doctor object has been successfully created'
 
-	# 	#Assign the attributes to the doctor object
+	# 	#Assign the attributes to the doctor object 
 	# 	temp_doctor_object.doctor_first_name = "Katelyn"
 	# 	temp_doctor_object.doctor_last_name = "Duffy"
 	# 	temp_doctor_object.doctor_type = "Gynecologist"
@@ -148,7 +147,7 @@ from django.shortcuts import redirect, get_object_or_404
 		# self.assertEqual(approval, 1)
 		# approved_patient.save()
 
-
+		
 
 		#user is now created, we want to update the health conditions of the patient
 		# patient_health_conditions = PatientHealthConditions.objects.create()
@@ -199,93 +198,67 @@ from django.shortcuts import redirect, get_object_or_404
 	# current_health_conditions = models.ForeignKey(PatientHealthConditions, unique=False, blank=True, default="", null=True)
 
 
-#class TestingPatientAlertSystem(TestCase):
+class TestingPatientAlertSystem(TestCase):
 
 	#Globally references patient object
-	#def testAlertSystem(self):
-		#temp_patient_object = TempPatientData.objects.create()
+	def testAlertSystem(self):
+		temp_patient_object = TempPatientData.objects.create()
 		#Create the user to append into the model
-		#temp_patient_object.user = User.objects.create(username="johnson", email="johnson@johnson.com", password="johnson")
-		#print 'Temporary Patient Created Successfully!'
+		temp_patient_object.user = User.objects.create(username="johnson", email="johnson@johnson.com", password="johnson")
+		print 'Temporary Patient Created Successfully!'
 
 		#Assign the attributes that are associated with the user
-		#temp_patient_object.first_name = "Ryan"
-		#temp_patient_object.last_name = "Schachte"
-		#temp_patient_object.DOB = "2201995"
-		#temp_patient_object.ssn = "600489139"
-		#temp_patient_object.allergies = "NONE"
-		#temp_patient_object.address = "2463 E. Mallory Dr. Tempe, AZ 85281"
-		#temp_patient_object.medications = "NONE"
-		#temp_patient_object.insurance_provider = "Allstate"
-		#temp_patient_object.insurance_policy_number = "19938343434"
-		#temp_patient_object.email_address = "johnson@johnson.com"
-		#temp_patient_object.data_sent = "1"
+		temp_patient_object.first_name = "Ryan"
+		temp_patient_object.last_name = "Schachte"
+		temp_patient_object.DOB = "2201995"
+		temp_patient_object.ssn = "600489139"
+		temp_patient_object.allergies = "NONE"
+		temp_patient_object.address = "2463 E. Mallory Dr. Tempe, AZ 85281"
+		temp_patient_object.medications = "NONE"
+		temp_patient_object.insurance_provider = "Allstate"
+		temp_patient_object.insurance_policy_number = "19938343434"
+		temp_patient_object.email_address = "johnson@johnson.com"
+		temp_patient_object.data_sent = "1"
 
 		#Save user into the test database
-		#temp_patient_object.save()
+		temp_patient_object.save()
 
-		#self.assertEqual(temp_patient_object.first_name, "Ryan")
-		#self.assertEqual(temp_patient_object.last_name, "Schachte")
-		#self.assertEqual(temp_patient_object.DOB, "2201995")
-		#self.assertEqual(temp_patient_object.ssn, "600489139")
-		#self.assertEqual(temp_patient_object.allergies, "NONE")
-		#self.assertEqual(temp_patient_object.address, "2463 E. Mallory Dr. Tempe, AZ 85281")
-		#self.assertEqual(temp_patient_object.medications, "NONE")
-		#self.assertEqual(temp_patient_object.insurance_provider, "Allstate")
-		#self.assertEqual(temp_patient_object.insurance_policy_number, "19938343434")
-		#self.assertEqual(temp_patient_object.email_address, "johnson@johnson.com")
-		#self.assertEqual(temp_patient_object.data_sent, "1")
+		self.assertEqual(temp_patient_object.first_name, "Ryan")
+		self.assertEqual(temp_patient_object.last_name, "Schachte")
+		self.assertEqual(temp_patient_object.DOB, "2201995")
+		self.assertEqual(temp_patient_object.ssn, "600489139")
+		self.assertEqual(temp_patient_object.allergies, "NONE")
+		self.assertEqual(temp_patient_object.address, "2463 E. Mallory Dr. Tempe, AZ 85281")
+		self.assertEqual(temp_patient_object.medications, "NONE")
+		self.assertEqual(temp_patient_object.insurance_provider, "Allstate")
+		self.assertEqual(temp_patient_object.insurance_policy_number, "19938343434")
+		self.assertEqual(temp_patient_object.email_address, "johnson@johnson.com")
+		self.assertEqual(temp_patient_object.data_sent, "1")
 
-		#patient_object = Patient.objects.create()
+		patient_object = Patient.objects.create()
 
-		#patient_object.fill_from_application = temp_patient_object
-		#patient_object.user = temp_patient_object.user
-		#patient_object.approved = 1
-		#patient_object.alertSent = 1
+		patient_object.fill_from_application = temp_patient_object
+		patient_object.user = temp_patient_object.user
+		patient_object.approved = 1
+		patient_object.alertSent = 1
 
-		#self.assertEqual(patient_object.alertSent,1)
-		#self.assertEqual(patient_object.approved, 1)
-		#self.assertEqual(patient_object.user.username, 'johnson')
+		self.assertEqual(patient_object.alertSent,1)
+		self.assertEqual(patient_object.approved, 1)
+		self.assertEqual(patient_object.user.username, 'johnson')
 
-		#patient_object.save()
+		patient_object.save()
+		
+		alert_object = Alert.objects.create()
+		alert_object.alert_level = 40
+		alert_object.alert_patient = patient_object
+		alert_object.alert_description = 'Hello, this is the description for alerts'
+		alert_object.save()
 
-		#alert_object = Alert.objects.create()
-		#alert_object.alert_level = 40
-		#alert_object.alert_patient = patient_object
-		#alert_object.alert_description = 'Hello, this is the description for alerts'
-		#alert_object.save()
+		self.assertEqual(alert_object.alert_level, 40)
+		self.assertEqual(alert_object.alert_patient, patient_object)
+		alert_object.alert_description, 'Hello, this is the description for alerts'
 
-		#self.assertEqual(alert_object.alert_level, 40)
-		#self.assertEqual(alert_object.alert_patient, patient_object)
-		#alert_object.alert_description, 'Hello, this is the description for alerts'
+		pprint(alert_object)
 
-		#pprint(alert_object)
+		print '\n\n\nALERT FOR THE USER HAS BEEN SUCCESSFULLY CREATED!\n\n\n'
 
-		#print '\n\n\nALERT FOR THE USER HAS BEEN SUCCESSFULLY CREATED!\n\n\n'
-class TestApptDelete(TestCase):
-	def testapptdelete(self):
-#doctor_first_name
-#doctor_last_name
-#doctor_type
-#doctor_user
-		temp_patient_appt = PatientAppt.objects.create()#....i think its this
-		temp_patient_appt.user = User.objects.create(username="johnson", email="johnson@johnson.com", password="johnson")
-		#temp_patient_appts.doctor= Doctor.object.create()
-		temp_patient_appt.date = "10/30/2015"
-		#temp_patient_appt.pain_level = 1
-		temp_patient_appt.medical_conditions="shot in leg"
-		temp_patient_appt.allergies="sanity"
-		temp_patient_appt.resolved = 1
-
-		temp_patient_appt.save()
-		assertTrue(temp_patient_appt.exist())
-		print ("patient appointment successfully created")
-'''
-		#Create the user to append into the model
-		#temp_patient_object.user = User.objects.create(username="johnson", email="johnson@johnson.com", password="johnson")
-		#print 'Temporary Patient Created Successfully!'
-		appt = get_object_or_404(temp_patient_appt,pk=pk)
-		appt.delete()
-		print ("patient appointment successfully deleted!")
-		self.assertFalse(temp_patient_appt.exists())
-		'''
