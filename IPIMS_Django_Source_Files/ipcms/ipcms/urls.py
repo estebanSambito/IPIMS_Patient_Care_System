@@ -47,5 +47,12 @@ urlpatterns = [
     url(r'^accounts/portal/hsp/approvals/approve$', ProcessPatientApproval, name="ProcessPatientApproval"),
     url(r'^delete/(?P<pk>\d+)$', appt_delete, name='delete'),
     url(r'^doctor_delete/(?P<pk>\d+)$', doctor_appt_delete, name='doctor_delete'),
+    url(r'^faqs$', FAQView, name="FAQView"),
+    url(r'^accounts/portal/clear/$', clear_perscription_notification, name='clear_perscription_notification'),
+    url(r'^accounts/portal/admin/view_lab_results$', get_lab_results, name="get_lab_results"),
+    url(r'^accounts/portal/admin/all_lab_tests$', display_all_lab_results, name="display_all_lab_results"),
+    url(r'^accounts/portal/admin/create_lab_report$', CreateLabReportView, name="CreateLabReportView"),
+    url(r'^accounts/portal/admin/delete_lab_report$', delete_lab_results, name="delete_lab_results"),
+    url(r'^accounts/portal/admin/edit_lab_report$', edit_lab_results, name="edit_lab_results"),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

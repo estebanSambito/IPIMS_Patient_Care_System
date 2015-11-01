@@ -15,6 +15,14 @@ class Doctor(models.Model):
 	def __unicode__(self):
 		return "Dr. " + str(self.doctor_first_name.title()) + ' ' + str(self.doctor_last_name.title()) + ' - ' + str(self.doctor_type.title())
 
+class LabTech(models.Model):
+	lab_first_name = models.CharField(max_length=256, default="")
+	lab_last_name = models.CharField(max_length=256, default="")
+	lab_user = models.OneToOneField(User, unique=True, blank=False, default="", null=False)
+
+	def __unicode__(self):
+		return str(self.lab_first_name) + ' ' + str(self.lab_last_name)
+
 class PermissionsRole(models.Model):
 	role = models.CharField(max_length=256, choices=[('admin', 'admin'), ('nurse', 'nurse'), ('staff', 'staff'), ('doctor', 'doctor'), ('patient', 'patient'), ('lab', 'lab')])
 	user = models.OneToOneField(User, unique=True,  blank=True, default="")
@@ -59,7 +67,7 @@ class Patient(models.Model):
 
 
 	def __unicode__(self):
-		return str(self.user)
+		return 'Email: ' + str(self.user) + ' First Name: ' + str(self.fill_from_application.first_name) + ' Last Name: ' + str(self.fill_from_application.last_name)
 
 class PatientHealthConditions(models.Model):
 
@@ -102,5 +110,14 @@ class Alert(models.Model):
 	alert_description = models.CharField(max_length=255, default="", null = True, unique=False)
 
 class EMedication(models.Model):
-	patient = models.OneToOneField(Patient, null=False, default='', blank=False)
+	patient = models.ForeignKey(Patient, null=False, default='', blank=False)
 	medication_name = models.CharField(max_length=255, default = '', blank=False, null=False)
+	reminder = models.IntegerField(default=0)
+	prescribed_by_doctor = models.ForeignKey(Doctor, default="0")
+
+class LabReport(models.Model):
+	lab_patient = models.ForeignKey(Patient, default = "0")
+	lab_results = models.CharField(max_length=255, choices=[('positive', 'Positive'), ('negative', 'Negative')])
+	lab_test = models.CharField(max_length=255, choices=[('Blood pressure screening', 'Blood pressure screening'), ('C-reactive protein test', 'C-reactive protein test'), ('Colonoscopy', 'Colonoscopy'), ('Diabetes risk tests', 'Diabetes risk tests'), ('Pap smear', 'Pap smear'), ('Skin cancer exam', 'Skin cancer exam'), ('Blood Tests', 'Blood Tests')])
+	lab_notes = models.TextField(default="Insert Notes For Lab Test")
+	lab_tech = models.ForeignKey(LabTech, default="")

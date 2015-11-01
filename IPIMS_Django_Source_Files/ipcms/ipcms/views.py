@@ -5,10 +5,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse_lazy
-from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm
+from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm, LabReportForm
 from django.template import RequestContext
 from django.views.generic import ListView
-from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication
+from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication, LabReport
 from django.shortcuts import render_to_response
 from .forms import PatientApptForm
 from django.template import RequestContext
@@ -71,6 +71,7 @@ def HomePageView(request):
 
 	#Assign default permission role
 	permissionRoleForUser = 'pending'
+	medications_for_patient = ""
 
 	#Assign a default approval rating
 	approval = 0
@@ -171,6 +172,7 @@ def PatientPortalView(request):
 
 	#Assign default permission role
 	permissionRoleForUser = 'pending'
+	medications_for_patient = ''
 
 	#Assign a default approval rating
 	approval = 0
@@ -350,6 +352,19 @@ def PatientPortalView(request):
 				print patient_date_time_set.date_created
 				print 'SET'
 
+	if not permissionRoleForUser == "pending":
+		if permissionRoleForUser.role == 'patient':
+
+			#Query the medication pickups for the patient
+			medications_for_patient = EMedication.objects.filter(reminder=0, patient__user=request.user).all()
+			print medications_for_patient
+
+			if len(medications_for_patient) == 0:
+				medications_for_patient = "No Medications Pending"
+
+
+
+
 
 	context = {
 
@@ -369,7 +384,8 @@ def PatientPortalView(request):
 		'appts' : appts,
 		'current_patient' : current_patient,
 		'unapproved_patient_list' : unapproved_patient_list,
-		'unapproved_count' : unapproved_count
+		'unapproved_count' : unapproved_count,
+		'medications_for_patient' : medications_for_patient
 
 	}
 
@@ -805,6 +821,7 @@ def PatientDataView(request):
 
 	#get permissions of current user
 	roles = PermissionsRole.objects.filter(user=request.user)[:1].get()
+
 	patients = ''
 
 	if roles.role == 'doctor':
@@ -814,6 +831,18 @@ def PatientDataView(request):
 			patients = 0
 		else:
 			print patients
+
+
+		final_patient_list = []
+		final_patient_users = []
+
+		for patient in patients:
+			if patient.user.user not in final_patient_users:
+				final_patient_users.append(patient.user.user)
+				final_patient_list.append(patient)
+
+		patients = final_patient_list
+
 
 	context = {
 
@@ -894,7 +923,10 @@ def MedicalHistoryView(request):
 
 		patient_primary_key = request.POST.get('pk_patient', '')
 
-		patient_appts = PatientAppt.objects.filter(user_id=patient_primary_key).all()
+		print patient_primary_key
+		print 'is the primary key'
+
+		patient_appts = PatientAppt.objects.filter(id=patient_primary_key).all()
 
 		patient_obj = patient_appts[0].user
 
@@ -906,13 +938,18 @@ def MedicalHistoryView(request):
 		allergies = allergies.split(',')
 		medications = medications.split(',')
 
+		doc_meds = EMedication.objects.filter(patient=patient_obj).all()
+		print 'The doc meds are',
+		print doc_meds
+
 		context = {
 
 			'appts' : patient_appts,
 			'patient' : patient_obj,
 			'temp_user_data' : patient_obj.fill_from_application,
 			'allergies' : allergies,
-			'medications' : medications
+			'medications' : medications,
+			'doc_meds' : doc_meds
 		}
 
 	elif request.method == "POST" and 'pk_patient2' in request.POST:
@@ -939,6 +976,10 @@ def MedicalHistoryView(request):
 		allergies = allergies.split(',')
 		medications = medications.split(',')
 
+		doc_meds = EMedication.objects.filter(patient=current_patient).all()
+		print 'The doc meds are',
+		print doc_meds
+
 
 		context = {
 
@@ -947,6 +988,7 @@ def MedicalHistoryView(request):
 			'temp_user_data' : patient_obj.fill_from_application,
 			'allergies' : allergies,
 			'medications' : medications,
+			'doc_meds' : doc_meds
 		}
 
 
@@ -1061,3 +1103,142 @@ def doctor_appt_delete(request, pk):
 		'roles'          : roles
 	}'''
     return render(request,'doctor_scheduled_appointments.html')
+
+
+def clear_perscription_notification(request):
+
+	#Find the prescription by the primary key and removing the notification
+	if request.method == "POST" and 'pres' in request.POST:
+
+		pres_pk = request.POST.get('pres')
+		if (EMedication.objects.filter(pk=pres_pk).exists()):
+			perscription_to_edit = EMedication.objects.filter(pk=pres_pk).get()
+			perscription_to_edit.reminder = 1
+			perscription_to_edit.save()
+			return HttpResponseRedirect(reverse("Portal"))
+	else:
+		return HttpResponseRedirect(reverse("Portal"))
+
+
+def get_lab_results(request):
+
+	#This view is going to be responsible for getting all the lab results and description for each patient
+
+	if request.method == "POST" and 'patient_labs' in request.POST:
+		#We need to get all the lab results based on the patient PRIMARY KEY
+
+		patient_labs = request.POST.get("patient_labs", "")
+
+		patient_lab_results = LabReport.objects.filter(lab_patient__pk=patient_labs).all()
+		current_patient = Patient.objects.filter(pk=patient_labs).get()
+
+		context = {
+
+			'patient_lab_results' : patient_lab_results,
+			'current_patient' : current_patient
+		}
+
+		return render(request,'labresults.html', context)
+	else:
+		return HttpResponseRedirect(reverse("Portal"))
+
+def display_all_lab_results(request):
+
+	#Query all the lab reports in the system into an object to loop and display for
+
+	all_lab_tests = LabReport.objects.all()
+
+	print all_lab_tests
+
+	context = {
+
+		'all_lab_tests' : all_lab_tests
+	}
+
+	return render(request,'all_lab_results.html', context)
+
+def delete_lab_results(request):
+
+	if request.method == "POST" and "report_remove" in request.POST:
+
+		lab_found = request.POST.get("report_remove", "")
+
+		delete_this_lab = LabReport.objects.filter(pk=lab_found).get()
+		delete_this_lab.delete()
+
+		all_lab_tests = LabReport.objects.all()
+
+		context = {
+
+			'all_lab_tests' : all_lab_tests
+		}
+
+		return render(request,'all_lab_results.html', context)
+
+def edit_lab_results(request):
+
+	primary_key_val = ""
+
+	if request.method == "POST" and "report_remove" in request.POST:
+
+		lab_found = request.POST.get("report_remove", "")
+
+		model_instance = LabReport.objects.get(pk=lab_found)
+
+		print 'The current lab model that has been found is: \n'
+		print model_instance
+
+		primary_key_val = model_instance
+
+		form = LabReportForm(instance=model_instance)
+
+		context = {
+			'form' : form
+		}
+
+		return render(request,'edit_lab_report.html', context)
+
+	elif request.method == "POST":
+
+
+		form = LabReportForm(request.POST, instance=primary_key_val)
+
+		context = {
+
+			'form' : form
+
+		}
+
+		if form.is_valid():
+
+			form.save()
+			return HttpResponseRedirect('/accounts/portal/')
+
+		return render(request,'all_lab_results.html', context)
+
+
+
+
+
+def CreateLabReportView(request):
+
+	title = "Lab Report Creation Form"
+	form = LabReportForm(request.POST or None)
+
+	if form.is_valid():
+		instance = form.save(commit=False)
+
+		instance.save()
+		return HttpResponseRedirect('formsuccess')
+
+
+	context = {
+		"form": form,
+		"template_title": title,
+	}
+	return render(request, 'create_report.html', context)
+
+
+def FAQView(request):
+	return render(request,'questions.html')
+

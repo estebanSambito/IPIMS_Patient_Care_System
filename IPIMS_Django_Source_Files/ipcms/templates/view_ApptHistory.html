@@ -6,7 +6,7 @@
 {% block content %}
 
 <br><br>
-<center><h1>View Appointments</h1></center>
+<center><h1>View Appointments History</h1></center>
 <hr>
 
 {% if user.is_authenticated %}
@@ -20,8 +20,7 @@
 			<th>Doctor &amp; Speciality</th>
 			<th>Summary</th>
 			<th>Date &amp; Time</th>
-			<th>Edit</th>
-			<th>Cancel</th>
+
 		</tr>
 	</thead>
 	<!-- Table Header -->
@@ -35,8 +34,6 @@
 				{{appts.medical_conditions|title}}
 				</td>
 				<td>{{appts.date}}</td>
-				<td>Revise</td>
-				<td>Cancel</td>
 
 			</tr>
 		{% endfor %}

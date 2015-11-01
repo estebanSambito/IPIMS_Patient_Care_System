@@ -53,7 +53,7 @@
 	<div class="col-md-4">
 		<i><h3>Medical History</h3></i>
 		<hr>
-		<h5><a href="#">Click To View Lab Records</a></h5><br>
+		<!-- <h5><a href="#">Click To View Lab Records</a></h5><br> -->
 
 		<h3>Allergies</h3>------------------------------------------------------------
 		
@@ -65,9 +65,18 @@
 
 		<h3>Medications</h3>------------------------------------------------------------
 
-		{% for medication in medications %}
-			<h4>-{{medication}}</h4>
+		{% if medications|length > 1 %}
+			{% for medication in medications %}
+				<h4>-{{medication}}</h4>
+			{% endfor %}
+		{% endif %}
+
+		{% for meds in doc_meds %}
+
+			<h4>-{{meds.medication_name}}</h4>
+
 		{% endfor %}
+
 	</div>
 
 

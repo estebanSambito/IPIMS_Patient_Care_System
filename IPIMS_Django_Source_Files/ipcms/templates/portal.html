@@ -94,6 +94,9 @@
       {% if user.username == "admin" %}
       <h2>Administrative Control Panel</h2><hr>
 
+      {% elif roles.role == "lab" %}
+      <h2>Lab Staff Control Panel</h2><hr>
+
       {% elif roles.role == "doctor" %}
       <h2>Doctor Control Panel</h2><h3>Welcome Dr. {{doc_name}}</h3><hr>
 
@@ -169,19 +172,52 @@
               <a href="/accounts/portal/view_appts/" class="btn">Current Appointments</a><br><br>
               <a href="/accounts/portal/view_ApptHistory" class="btn">Appointment History</a><br><br><hr>
               <h3>Lab Results Information</h3><br>
-              <a href="/schedule" class="btn">My Lab Results</a>
+
+              <form method="POST" action="/accounts/portal/admin/view_lab_results">
+                {% csrf_token %}
+                <input type="submit" class="btn" value="View My Lab Results"></a>
+                <input type="hidden" name="patient_labs" value="{{current_patient.pk}}">
+              </form>
         </div>
         <br>
 
         <h3>Emergency/Other Information</h3><br>
         {% if alert_sent == 0 %}
           <a class="btn btn-red" data-toggle="modal" data-target="#myModal">Emergency IPIMS Alert</a><br><br>
-          <a class="btn btn-blue">Help &amp; FAQ'S</a>
+          <a class="btn btn-blue" href="/faqs">Help &amp; FAQ'S</a>
 
           {% else %}
           <h4><b>Your alert has been sent to the hospital!</b></h4>
-          <a class="btn btn-blue">Help &amp; FAQ'S</a>
+          <a class="btn btn-blue" href="/faqs">Help &amp; FAQ'S</a>
         {% endif %}
+        <br><br><br><br><br><br>
+        <hr>
+
+
+            <h3>E-Prescription Pickup Reminders!</h3>
+        <div id ="reminders" class="col-sm-4">
+            {% if not medications_for_patient == "No Medications Pending" %}
+            <ul><br>
+              {% for medications in medications_for_patient %}
+
+              <form method="POST" action="/accounts/portal/clear/">
+                {% csrf_token %}
+                <b><li>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{{medications.medication_name}}&emsp;&emsp;&emsp;&emsp;<button type="submit" name="pres" value="{{medications.pk}}">Clear Notification</button></li><b>
+              </form>
+
+              {% endfor %}
+
+            </ul>
+
+            {% else %}
+
+              {{medications_for_patient}}
+
+            {% endif %}
+      </div>
+
+
+
 
         </div>
 
@@ -263,7 +299,7 @@
     <a href="/accounts/portal/admin/scheduled_appts" class="btn">View Scheduled Appointments<br><i>{{appts}} Queued!</i></a><br><br>
     <a href="/accounts/portal/admin/view_patients" class="btn">View My Patients</a><br><br>
     <a href="/accounts/portal/prescribe" class="btn">E-Prescribe Medication</a><br><br>
-    <a href="/accounts/portal/admin/generate" class="btn">View Lab Reports</a><br><br>
+    <a href="/accounts/portal/admin/all_lab_tests" class="btn">View Lab Reports</a><br><br>
     <a href="/accounts/portal/admin/generate" class="btn">Generate Stats Report</a><br><br>
 
 
@@ -300,6 +336,7 @@
 <!-- There are current {{unapproved_count}} people waiting for application approval!<br> -->
 
 
+    <!-- <a href="/accounts/portal/view_alerts" class="btn btn-red">Click To View All Alerts<br><i>{{alerts_count}} Emergency Alert(s)!</i></a><br><br> -->
     <a href="/accounts/portal/hsp/approvals" class="btn">Application Approvals<br></a><br>({{unapproved_count}} people waiting for application approval)<br><br>
     <a href="/accounts/portal/admin/generate" class="btn">View Patient Data</a><br><br>
     <!-- <a href="/accounts/portal/admin/generate" class="btn">Emergency Alerts</a><br><br> -->
@@ -325,6 +362,26 @@
 
   </div>
   {% endif %}
+
+
+
+
+
+  {% if roles.role == "lab" %}
+
+  <div class="col-md-12">
+<!-- There are current {{unapproved_count}} people waiting for application approval!<br> -->
+
+
+    <!-- <a href="/accounts/portal/view_alerts" class="btn btn-red">Click To View All Alerts<br><i>{{alerts_count}} Emergency Alert(s)!</i></a><br><br> -->
+    <a href="/accounts/portal/admin/all_lab_tests" class="btn">View Lab Reports</a><br><br>
+    <a href="/accounts/portal/admin/create_lab_report" class="btn">Run Lab Report</a><br><br>
+
+
+  </div>
+  {% endif %}
+
+
 
 </div>
 
