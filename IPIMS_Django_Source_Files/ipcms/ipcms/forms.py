@@ -2,7 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.forms import AuthenticationForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
-from .models import Patient, PatientAppt, PatientHealthConditions, TempPatientData, EMedication, LabReport
+from .models import Patient, PatientAppt, PatientHealthConditions, TempPatientData, EMedication, patientMedicalReport, LabReport
 from django.db import models
 from django import forms
 
@@ -94,3 +94,22 @@ class TempPatientDataForm(forms.ModelForm):
         }
         fields = '__all__'
         exclude = ['user', 'data_sent', 'email_address']
+
+class PatientMedicalReportForm(forms.ModelForm):
+    class Meta:
+        widgets = {
+            'first_name': forms.TextInput(attrs={'placeholder': 'Legal First Name'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Legal Last Name'}),
+            'DOB': forms.TextInput(attrs={'placeholder': '01/01/2000'}),
+            'allergies': forms.TextInput(attrs={'placeholder': 'Separate your allergies by commas'}),
+            'medications': forms.TextInput(attrs={'placeholder': 'Separate your medications by commas'}),
+            'insurance_policy_number': forms.TextInput(attrs={'placeholder': 'Valid Insurance Required'}),
+            'gender': forms.TextInput(attrs={'placeholder': 'Gender'}),
+            'age': forms.TextInput(attrs={'placeholder': 'Age'}),
+            'race': forms.TextInput(attrs={'placeholder': 'Race'}),
+            'DOB': forms.TextInput(attrs={'placeholder': 'Date of Birth'}),
+            'insurance_provider': forms.TextInput(attrs={'placeholder': 'Insurance Provider'}),
+            'insurance_policy_number': forms.TextInput(attrs={'placeholder': 'Insurance Policy Number'}),
+        }
+        fields = '__all__'
+

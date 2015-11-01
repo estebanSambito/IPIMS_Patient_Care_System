@@ -54,5 +54,7 @@ urlpatterns = [
     url(r'^accounts/portal/admin/create_lab_report$', CreateLabReportView, name="CreateLabReportView"),
     url(r'^accounts/portal/admin/delete_lab_report$', delete_lab_results, name="delete_lab_results"),
     url(r'^accounts/portal/admin/edit_lab_report$', edit_lab_results, name="edit_lab_results"),
+    url(r'^accounts/portal/uploadMedicalReportView$', uploadMedicalReportView, name="med_view"),
+
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -25,7 +25,7 @@
 				         <!-- <input type="submit" value ="View Medical History"<a href="/accounts/portal/medical_history">Click Here</a><hr> -->
 				         <form method ="POST" action='/accounts/portal/medical_history'>
 				         	{% csrf_token %}
-				         	<input type="submit" class="btn-sm" value="View Patient Case"> 
+				         	<input type="submit" class="btn-sm" value="View Patient Case">
 				         	<input type="hidden" name="pk_patient" value={{alert.alert_patient.pk}}>
 				         </form>
 				  	<hr>
