@@ -9,10 +9,10 @@ from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthCondit
 from django.template import RequestContext
 from django.views.generic import ListView
 from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication, LabReport
-from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm, PatientMedicalReportForm
+from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm
 from django.template import RequestContext
 from django.views.generic import ListView
-from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication, patientMedicalReport
+from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication
 from django.shortcuts import render_to_response
 from .forms import PatientApptForm
 from django.template import RequestContext
@@ -1263,58 +1263,3 @@ def FAQView(request):
 	# }
 	# return render(request,'doctor_scheduled_appointments.html',context)
 
-def uploadMedicalReportView(request,pk):
-	user_has_been_located = False
-
-	patient_model = Patient #Perform queries on the database model that holds all the patient information
-
-	search_data_list = ""
-
-	patient_found = ''
-
-#Grab the post param information so that you can perform iteration logic through the database on the searchable customer
-	if request.method == "POST":
-		search_data = request.POST.get("search_data", "") #store the data of the user search information into a variable that you can parse
-		db_search_type = request.POST.get("db_search_type", "")
-
-		search_data_list = search_data.split(" ") #If there is more than one entry in the search bar, parse it as necessary
-
-	#Check to see if the inputted email matches any of the patient emails in the databases
-
-	elif db_search_type == "firstlast":
-		if patient_model.objects.filter(fill_from_application__first_name__iexact=search_data_list[0]).exists() and patient_model.objects.filter(fill_from_application__last_name__iexact=search_data_list[1]).exists():
-			patient_found = patient_model.objects.filter(fill_from_application__first_name__iexact=search_data_list[0], fill_from_application__last_name__iexact=search_data_list[1]).all()
-			search_data_list.append(patient_found)
-			user_has_been_located = True
-
-	if search_data_list == "":
-
-		context = {
-
-		'search_data': 'none',
-		'located': user_has_been_located
-		}
-
-	elif user_has_been_located == True:
-
-
-		context = {
-
-		'search_data': search_data_list,
-		'temp_user_data': patient_found,
-		'located': user_has_been_located
-		}
-
-	else:
-
-		context = {
-
-		'search_data': search_data_list,
-		'temp_user_data': patient_found,
-		'located': user_has_been_located
-		}
-
-		title = "Medical Report Form"
-		form = PatientMedicalReportForm(request.POST or None)
-
-		return render(request, 'portal.html', context)

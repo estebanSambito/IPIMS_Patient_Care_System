@@ -123,17 +123,3 @@ class LabReport(models.Model):
 	lab_notes = models.TextField(default="Insert Notes For Lab Test")
 	lab_tech = models.ForeignKey(LabTech, default="")
 
-
-class patientMedicalReport(models.Model):
-		#user = models.OneToOneField(User,unique=True,null=True,default="")
-		first_name = models.CharField(max_length=256, default="")
-		last_name = models.CharField(max_length=256, default="")
-		age = models.IntegerField(default = 18, blank=False)
-		gender = models.CharField(max_length=256, choices=[('male','Male'), ('female', 'Female'), ('other', 'Other'), ('prefer not to say', 'Prefer Not To Say')], default='Select a gender', blank = False)
-		race = models.CharField(max_length=256, choices=[('white', 'White'), ('american_indian_alaskan_native', 'American Indian or Alaskan Native'),('hawaiian', 'Native Hawaiian or Other Pacific Islander'),('black', 'Black or African American'),('asian', 'Asian'), ('other', 'Other')], default="Other")
-		DOB = models.DateField(auto_now=False, auto_now_add=False, default="")
-		allergies = models.CharField(max_length=256, default="")
-		medications = models.CharField(max_length=256, default="")
-		insurance_provider =models.CharField(max_length=256, blank=False)
-		insurance_policy_number = models.IntegerField(blank=False)
-
