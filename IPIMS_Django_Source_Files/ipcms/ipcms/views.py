@@ -1,17 +1,12 @@
 from __future__ import absolute_import
 from django.views import generic
-from django.template import loader, Context
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.core.urlresolvers import reverse_lazy
-from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm
-from django.template import RequestContext
-from django.views.generic import ListView
-from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication
-from django.shortcuts import render_to_response
+from .forms import RegistrationForm, LoginForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm
+from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor
 from .forms import PatientApptForm
-from django.template import RequestContext
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
@@ -27,7 +22,7 @@ def AlertSender(request):
 	print 'inside alert sender'
 	patient_model = Patient.objects.get(user__username=request.user.username)
 	health_conditions_model = PatientHealthConditions.objects.get(user=patient_model)
-	patient_data_information = TempPatientData.objects.get(user__username=request.user.username)
+	#patient_data_information = TempPatientData.objects.get(user__username=request.user.username)
 
 	total_health_condition_level =  (health_conditions_model.nausea_level +
 									health_conditions_model.hunger_level +
@@ -69,7 +64,7 @@ def HomePageView(request):
 	patientModel = Patient
 
 	#temp data for the user has been found
-	tempDataFound = 0
+	#tempDataFound = 0
 
 	#Assign default permission role
 	permissionRoleForUser = 'pending'
@@ -162,7 +157,7 @@ def PatientPortalView(request):
 	#Model Definitions & Declarations
 	permissionModel = PermissionsRole
 	patientModel = Patient
-	userModel = User
+	#userModel = User
 	tempModel = TempPatientData
 	conditions_complete = False
 	patient_model = Patient
@@ -390,7 +385,7 @@ def HealthConditionsView(request):
 	conditions_model = PatientHealthConditions
 	patient_model = Patient
 
-	data_exists = False
+	#data_exists = False
 
 	#Check if the health conditions already exist within the database
 	if patient_model.objects.filter(user__username=request.user.username)[:1].exists():
@@ -399,7 +394,7 @@ def HealthConditionsView(request):
 		if conditions_model.objects.filter(user=patient)[:1].exists():
 			instance = conditions_model.objects.filter(user=patient)[:1].get()
 			form = PatientHealthConditionsForm(instance=instance)
-			data_exists = True
+			#data_exists = True
 
 	if request.method == "POST":
 
@@ -505,23 +500,23 @@ def DeleteUser(request):
 def EmergencyAlerts(request):
 
 	#Model Definitions & Declarations
-	permissionModel = PermissionsRole
-	patientModel = Patient
-	userModel = User
-	tempModel = TempPatientData
-	conditions_complete = False
-	patient_model = Patient
-	conditions_model = PatientHealthConditions
-	alert_model = Alert
+	#permissionModel = PermissionsRole
+	#patientModel = Patient
+	#userModel = User
+	#tempModel = TempPatientData
+	#conditions_complete = False
+	#patient_model = Patient
+	#conditions_model = PatientHealthConditions
+	#alert_model = Alert
 
 	#Check to see if the user has logged into the system or not
 	if request.user.is_authenticated():
 
 		#Boolean to ensure valid request authentication
-		authenticated = True
+		#authenticated = True
 
 		#Attempt a DB query on the request object
-		if permissionModel.objects.filter(user__username=request.user.username)[:1].exists():
+		#if permissionModel.objects.filter(user__username=request.user.username)[:1].exists():
 
 			#If request object from query exists, create a variable assignment on that object
 			permissionRoleForUser = permissionModel.objects.filter(user__username=request.user.username)[:1].get()
@@ -553,10 +548,10 @@ def EmergencyAlerts(request):
 def UpdateAccountView(request):
 	title = "Update Account Information"
 	form = TempPatientDataForm(request.POST or None)
-	patient_model = Patient
+	#patient_model = Patient
 
 
-	patient = patient_model.objects.filter(user=request.user)[:1].get()
+	#patient = patient_model.objects.filter(user=request.user)[:1].get()
 
 	if (TempPatientData.objects.filter(user=request.user)[:1].exists()):
 
@@ -934,14 +929,6 @@ def doctor_appt_delete(request, pk):
     doctor_appt = get_object_or_404(PatientAppt,pk=pk)
     if request.method=='POST':
         doctor_appt.delete()
-	#First you need to get the current doctor to associate the doctor with the appts
-	current_doctor = Doctor.objects.filter(doctor_user=request.user)
-
-	if (Doctor.objects.filter(doctor_user = request.user).exists()):
-		current_doctor = Doctor.objects.filter(doctor_user = request.user).get()
-		relevant_appts = PatientAppt.objects.filter(doctor = current_doctor)
-		roles = PermissionsRole.objects.filter(user__username=request.user.username)[:1].get()
-
 
 	'''context = {
 
@@ -950,3 +937,33 @@ def doctor_appt_delete(request, pk):
 		'roles'          : roles
 	}'''
     return render(request,'doctor_scheduled_appointments.html')
+
+def appt_edit(request, pk):
+	title = "Appointment Schedule"
+	patient_model = Patient
+
+	current_appts_list = []
+
+	#First you need to get the current patient to associate the patient with the appts
+	current_patient = Patient.objects.filter(user=request.user)[:1].get()
+
+	#Now you need to find all the appts that are associated with the current user who is logged in
+	if (PatientAppt.objects.filter(user=current_patient)[:1].exists()):
+		current_appts = PatientAppt.objects.filter(user=current_patient).all()
+        instance = patient_model.objects.filter(user=request.user)[:1].get()
+        patient = patient_model.objects.filter(user__username=request.user.username)[:1].get()
+        form = PatientApptForm(instance = instance)
+
+	if form.is_valid():
+		instance = form.save(commit=False)
+		instance.patient = patient
+        instance.user = patient
+        instance.save()
+        return HttpResponseRedirect('formsuccess')
+
+	context = {
+		"form": form,
+		"template_title": title,
+	}
+	return render(request, 'schedule.html', context)
+
