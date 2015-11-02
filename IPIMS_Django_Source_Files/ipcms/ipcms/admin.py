@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .forms import *
-from .models import Patient, PatientAppt, PermissionsRole, Doctor, PatientHealthConditions, TempPatientData, Alert, EMedication, LabTech, LabReport,LabTech
+from .models import Patient, PatientAppt, PermissionsRole, Doctor, PatientHealthConditions, TempPatientData, Alert, EMedication, LabTech, LabReport,LabTech,AddMedicalHistory
 
 
 #Add custom columns to appear inside of the database for the user
@@ -35,6 +35,7 @@ class LabReportAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Alert,AlertAdmin)
+admin.site.register(AddMedicalHistory)
 admin.site.register(LabTech)
 admin.site.register(LabReport, LabReportAdmin)
 admin.site.register(TempPatientData,TempPatientDataAdmin)

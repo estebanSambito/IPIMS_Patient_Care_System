@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse_lazy
 from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm, LabReportForm
 from django.template import RequestContext
 from django.views.generic import ListView
-from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication, LabReport
+from .models import PermissionsRole, Patient, PatientHealthConditions, TempPatientData, Alert,PatientAppt, Doctor, EMedication, LabReport, AddMedicalHistory
 from .forms import RegistrationForm, LoginForm, PatientForm, PatientHealthConditionsForm, TempPatientDataForm, EMedicationForm
 from django.template import RequestContext
 from django.views.generic import ListView
@@ -22,8 +22,6 @@ from django.shortcuts import redirect
 import datetime
 
 #from django.shortcuts import redirect, get_object_or_404
-
-
 
 STAFF_APPROVAL_ROLES = ('admin', 'doctor', 'staff', 'nurse', 'lab')
 
@@ -927,12 +925,15 @@ def ResolvedPatientAjaxView(request):
 
 def MedicalHistoryView(request):
 
+	hsp_med_history = ""
+	allergy_list 	= ""
+	condition_list 	= ""
+
 	if request.method == "POST" and 'pk_patient' in request.POST:
 
 		patient_primary_key = request.POST.get('pk_patient', '')
 
 		print patient_primary_key
-		print 'is the primary key'
 
 		patient_appts = PatientAppt.objects.filter(id=patient_primary_key).all()
 
@@ -947,8 +948,18 @@ def MedicalHistoryView(request):
 		medications = medications.split(',')
 
 		doc_meds = EMedication.objects.filter(patient=patient_obj).all()
-		print 'The doc meds are',
-		print doc_meds
+
+		if (AddMedicalHistory.objects.filter(patient=patient_obj).exists()):
+
+			hsp_med_history = AddMedicalHistory.objects.filter(patient=patient_obj).all()
+
+			print hsp_med_history
+
+			condition_list = hsp_med_history.medical_conditions.split(',')
+
+			allergy_list = hsp_med_history.allergies.split(',')
+
+
 
 		context = {
 
@@ -957,19 +968,16 @@ def MedicalHistoryView(request):
 			'temp_user_data' : patient_obj.fill_from_application,
 			'allergies' : allergies,
 			'medications' : medications,
-			'doc_meds' : doc_meds
+			'doc_meds' : doc_meds,
+			'hsp_med_history' : hsp_med_history,
+			'allergy_list' : allergy_list,
+			'condition_list' : condition_list
 		}
 
 	elif request.method == "POST" and 'pk_patient2' in request.POST:
 
 		patient_primary_key = request.POST.get('pk_patient2', '')
-		print (patient_primary_key)
 
-		# patient_primary_key = request.POST.get('pk_patient2', '1')
-		# print (patient_primary_key)
-
-
-		# current_patient = Patient.objects.filter(user_id=patient_primary_key).get()
 
 		if (Patient.objects.filter(id=patient_primary_key).exists()):
 			current_patient = Patient.objects.filter(id=patient_primary_key).get()
@@ -983,6 +991,12 @@ def MedicalHistoryView(request):
 			current_patient = Patient.objects.filter(pk=patient_primary_key).get()
 			print ('assigned based on primary key')
 
+
+		if (AddMedicalHistory.objects.filter(patient=current_patient).exists()):
+
+			hsp_med_history = AddMedicalHistory.objects.filter(patient=current_patient).all()
+
+			print hsp_med_history
 
 		patient_appts = PatientAppt.objects.filter(user=current_patient).all()
 
@@ -1008,7 +1022,8 @@ def MedicalHistoryView(request):
 			'temp_user_data' : patient_obj.fill_from_application,
 			'allergies' : allergies,
 			'medications' : medications,
-			'doc_meds' : doc_meds
+			'doc_meds' : doc_meds,
+			'hsp_med_history' : hsp_med_history
 		}
 
 
@@ -1169,11 +1184,16 @@ def display_all_lab_results(request):
 
 	all_lab_tests = LabReport.objects.all()
 
+
+	if PermissionsRole.objects.filter(user__username=request.user.username)[:1].exists():
+		roles = PermissionsRole.objects.filter(user__username=request.user.username)[:1].get()
+
 	print all_lab_tests
 
 	context = {
 
-		'all_lab_tests' : all_lab_tests
+		'all_lab_tests' : all_lab_tests,
+		'roles' : roles
 	}
 
 	return render(request,'all_lab_results.html', context)
@@ -1225,9 +1245,7 @@ def edit_lab_results(request):
 		form = LabReportForm(request.POST, instance=primary_key_val)
 
 		context = {
-
 			'form' : form
-
 		}
 
 		if form.is_valid():
@@ -1260,6 +1278,121 @@ def CreateLabReportView(request):
 def FAQView(request):
 	return render(request,'questions.html')
 
-	# }
-	# return render(request,'doctor_scheduled_appointments.html',context)
+
+def ViewAllPatientData(request):
+
+	temp_patient_data = Patient.objects.all()
+
+	print temp_patient_data
+
+	context = {
+
+		'temp_user_data' : temp_patient_data
+
+	}
+
+	return render(request, 'view_all_patient_data_hsp.html', context)
+
+def RemoveEmergencyAlert(request):
+
+	if request.method == "POST" and 'removal' in request.POST:
+
+		post_key = request.POST.get('removal', '')
+
+		removal_pk = Alert.objects.filter(alert_patient__pk=post_key).get()
+
+		removal_pk.delete()
+
+		return HttpResponseRedirect(reverse("ViewAlerts"))
+
+	else:
+		return HttpResponseRedirect(reverse("ViewAlerts"))
+
+
+def ViewCurrentPrescriptions(request):
+
+	if request.method == "POST" and "pk_patient2" in request.POST:
+		prim_key = request.POST.get("pk_patient2", "")
+
+		#Primary key for the patient is grabbed, now we need to get all the perscriptions that are associated with that patient
+		current_patient = Patient.objects.filter(pk=prim_key).get()
+		perscriptions = EMedication.objects.filter(patient=current_patient).all()
+
+		perscription_list = []
+
+		for scripts in perscriptions:
+			perscription_list.append(scripts)
+
+		context = {
+
+			'scripts' : perscription_list,
+			'current_patient' : current_patient
+		}
+
+	return render(request, 'view_pat_perscriptions.html', context)
+
+
+def MedicalReportView(request):
+
+	if request.method == "POST" and "pk_patient2" in request.POST:
+
+		#Store the primary key into a variable to query the patient object
+		primary_key_val = request.POST.get('pk_patient2', '')
+
+		patient_obj = Patient.objects.filter(pk=primary_key_val).get()
+
+		context = {
+
+			'patient_obj' : patient_obj
+		}
+		return render(request,'upload_med_report.html', context)
+
+	else: 
+		return render(request,'upload_med_report.html')
+
+def CreateMedicalReportView(request):
+
+	if request.method == "POST":
+
+		patient_prim_key = request.POST.get('pk_patient2', '')
+		patient_allergies = request.POST.get('allergies', '')
+		patient_conditions = request.POST.get('conditions', '')
+
+		#parse out commas and grab the current patient
+		current_patient = Patient.objects.filter(pk=patient_prim_key).get()
+
+		allergy_list = patient_allergies.split(',')
+
+		condition_list = patient_conditions.split(',')
+
+		medical_history_object = AddMedicalHistory.objects.create(patient = current_patient, allergies = patient_allergies, medical_conditions = patient_conditions)
+
+		medical_history_object.save()
+
+		return render(request,'accounts/formsuccess.html')
+
+def EditRelevantPatientMedicalHistory(request):
+
+
+	if request.method == "POST":
+
+		patient_pk = request.POST.get("pk_patient2", "")
+
+		instance = Patient.objects.filter(pk=patient_pk).get()
+
+		current_patient = instance
+
+		instance = TempPatientData.objects.filter(patient=current_patient).get()
+
+		form = TempPatientDataForm(instance = instance)
+
+		context = {
+
+			'form' : form,
+			'current_patient' : current_patient
+
+		}
+
+	return render(request,'edit_patient_history.html', context)
+
 

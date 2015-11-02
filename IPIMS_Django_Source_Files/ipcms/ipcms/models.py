@@ -43,13 +43,14 @@ class TempPatientData(models.Model):
 	race = models.CharField(max_length=256, choices=[('white', 'White'), ('american_indian_alaskan_native', 'American Indian or Alaskan Native'),('hawaiian', 'Native Hawaiian or Other Pacific Islander'),('black', 'Black or African American'),('asian', 'Asian'), ('other', 'Other')], default="Other")
 	income = models.CharField(max_length=256, choices=[('$0-$10,000', '$0-$10,000'), ('$10,001-$30,000', '$10,001-$30,000'), ('$30,001-$60,000', '$30,001-$60,000'),('$60,001-$85,000', '$60,001-$85,000'), ('$85,001-$110,000', '$85,001-$110,000'), ('$110,001+', '$110,001+'), ('Prefer Not To Say', 'Prefer Not To Say')], default='Prefer Not To Say', blank=False)
 	phone_number = PhoneNumberField(blank = True, default="")
-	DOB = models.DateField(auto_now=False, auto_now_add=False, default="")
-	ssn = models.IntegerField(blank=False)
+	# DOB = models.DateField(auto_now=False, auto_now_add=False, blank=True, null=True)
+	DOB = models.CharField(max_length=255, blank=True, null=True)
+	ssn = models.IntegerField(blank=True)
 	allergies = models.CharField(max_length=256, default="")
 	address = models.CharField(max_length=256, default="")
 	medications = models.CharField(max_length=256, default="")
 	insurance_provider =models.CharField(max_length=256, blank=False)
-	insurance_policy_number = models.IntegerField(blank=False)
+	insurance_policy_number = models.IntegerField(blank=True)
 	data_sent = models.IntegerField(default=0)
 
 
@@ -112,7 +113,6 @@ class Alert(models.Model):
 class EMedication(models.Model):
 	patient = models.ForeignKey(Patient, null=False, default='', blank=False)
 	medication_name = models.CharField(max_length=255, default = '', blank=False, null=False)
-
 	reminder = models.IntegerField(default=0)
 	prescribed_by_doctor = models.ForeignKey(Doctor, default="0")
 
@@ -122,4 +122,9 @@ class LabReport(models.Model):
 	lab_test = models.CharField(max_length=255, choices=[('Blood pressure screening', 'Blood pressure screening'), ('C-reactive protein test', 'C-reactive protein test'), ('Colonoscopy', 'Colonoscopy'), ('Diabetes risk tests', 'Diabetes risk tests'), ('Pap smear', 'Pap smear'), ('Skin cancer exam', 'Skin cancer exam'), ('Blood Tests', 'Blood Tests')])
 	lab_notes = models.TextField(default="Insert Notes For Lab Test")
 	lab_tech = models.ForeignKey(LabTech, default="")
+
+class AddMedicalHistory(models.Model):
+	allergies = models.CharField(max_length=255, default="")
+	medical_conditions = models.CharField(max_length=255, default="")
+	patient = models.ForeignKey(Patient, default="")
 

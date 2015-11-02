@@ -77,6 +77,14 @@
 
 		{% endfor %}
 
+		<br><h3>IPIMS Medical History Data</h3>------------------------------------------------------------<br>
+		<h4>
+			{% for history in hsp_med_history %}
+				Allergies: {{history.allergies}}<br>
+				Medical Conditions: {{history.medical_conditions}}<br>
+			{% endfor %}
+		</h4>
+
 	</div>
 
 

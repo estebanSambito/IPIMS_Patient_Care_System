@@ -33,9 +33,9 @@
 
 			<div class = "row r{{appts.resolved}}" id = "pullleft">
 				<div class="wrap"><br><br>
-				  <span class="horiz-flag noise "><h1 id ="box">Patient: {{appts.user.fill_from_application.first_name}} {{appts.user.fill_from_application.last_name}}</h1></span>
+				  <span class="horiz-flag noise "><h1 id ="box">Patient: {{appts.user.fill_from_application.first_name|title}} {{appts.user.fill_from_application.last_name|title}}</h1></span>
 				   <p>
-				         <hr><b>Patient Name:</b> {{appts.user.fill_from_application.first_name}} {{appts.user.fill_from_application.last_name}}<hr>
+				         <hr><b>Patient Name:</b> {{appts.user.fill_from_application.first_name|title}} {{appts.user.fill_from_application.last_name|title}}<hr>
 				         <b>Patient Pain Level:</b> {{appts.pain_level}} <hr>
 				         <b>Patient Appointment Summary:</b>  {{appts.medical_conditions}} <hr>
 				         <b>Patient Allergies:</b> {{appts.allergies}} <hr>
@@ -44,14 +44,21 @@
 
 				         <form method ="POST" action='/accounts/portal/medical_history'>
 				         	{% csrf_token %}
-				         	<input type="submit" class="btn-sm" value="View Medical History"> 
+				         	<input type="submit" class="resolver" value="View Medical History"> 
 				         	<input type="hidden" name="pk_patient" value={{appts.pk}}>
 				         </form>
                          
 				         <b>Cancel Current Appointment:</b>
 					     <form action="{% url 'doctor_delete' appts.id %}" method="POST">
 				         	{% csrf_token %}
-				         	<input type="submit" class="btn-sm" value="Cancel Appointment"> 
+				         	<input type="submit" class="resolver" value="Cancel Appointment"> 
+				         </form>
+
+
+				         <b>Prescribe Medication:</b>
+					     <form action="{% url 'PrescribeMedicationView' %}" method="GET">
+				         	{% csrf_token %}
+				         	<input type="submit" class="resolver" value="Prescribe Medication"> 
 				         </form>
 
 				    	 {% if appts.resolved == 1 %}

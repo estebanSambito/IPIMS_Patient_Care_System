@@ -37,7 +37,7 @@
 			    <hr>			       
 		         <form method ="POST" action='/accounts/portal/medical_history'>
 		         	{% csrf_token %}
-		         	<input type="submit" class="btn-sm" value="View Medical History"> 
+		         	<input type="submit" value="View Medical History"> 
 		         	<input type="hidden" name="pk_patient2" value="{{patient.user.id}}">
 		         </form>
 			    <hr>

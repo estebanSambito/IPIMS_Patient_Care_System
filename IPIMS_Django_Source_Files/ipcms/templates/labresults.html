@@ -1,9 +1,23 @@
 {% extends '_layouts/base.html' %}
 {% load crispy_forms_tags %}
 
+{% block extension %}
+
+	<script type = "text/javascript">
+		function printDiv() {
+
+			window.print();
+		}
+	</script>
+
+
+{% endblock %}
+
 {% block content %}
 
 	<center><h1>View Patient Lab Results</h1></center>
+
+	<a class="btn btn-blue" onclick="printDiv()">Print Lab Reports</a>
 
 	{% if user.is_authenticated %}
 		<div class="col-sm-12">
