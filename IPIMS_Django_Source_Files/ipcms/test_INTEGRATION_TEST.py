@@ -1,3 +1,4 @@
+from __future__ import division
 from django.test import TestCase, RequestFactory
 from django.contrib.auth.models import User
 from django.test.client import Client as client
@@ -7,7 +8,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.models import AnonymousUser, User
 import time
-from ipcms.views import PatientPortalView, HealthConditionsView
+from ipcms.views import PatientPortalView, HealthConditionsView, GenerateStatsView
 
 
 
@@ -50,7 +51,8 @@ class Test_FullIntegrationTest(TestCase):
 			email_address = "jacob@jacob.com",
 			data_sent = "1",
 			race = "black",
-			income = "$0-$10,000"
+			income = "$0-$10,000",
+			gender = "other"
 			)
 
 		#Implement a patient role up to the newly registered (pending) patient
@@ -570,9 +572,6 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\n\n\n----------------------------------------------------------\nINTEGRATION TEST FOR STATISTICAL REPORTS FUNCTIONALITY\n-----------------------------------------------------------'
 
-
-		print 'THIS NEEDS TO BE CODED STILL!'
-
 		'''
 		Health outcome analysis
 		Admission rate
@@ -580,7 +579,7 @@ class Test_FullIntegrationTest(TestCase):
 		Patient populations
 		'''
 
-		print '\t-Generating users to test against'
+		print '\t-Generating users to run statistical reports on'
 
 		#Generate 5 patients and begin doing statistical analysis and tests on the expected and actual output
 		self.patient_user1 = User.objects.create(username="pat1", password="pat1")
@@ -599,7 +598,8 @@ class Test_FullIntegrationTest(TestCase):
 			email_address = "patient1@patient1.com",
 			data_sent = "1",
 			race = "black",
-			income = "$0-$10,000"
+			income = "$0-$10,000",
+			gender = "female"
 			)
 
 		#Implement a patient role up to the newly registered (pending) patient
@@ -608,4 +608,204 @@ class Test_FullIntegrationTest(TestCase):
 			user = self.patient_user1,
 			approved = 1
 			)
+
+		self.patient_permission1 = PermissionsRole.objects.create(
+			role = "patient",
+			user = self.patient_user1
+			)
+
+		print '\t-Users generated successfully'
+
+		request = self.factory.get(reverse_lazy('GenerateStats'))
+		request.user = self.patient_user1
+		response = GenerateStatsView(request)
+
+		#Patient should not be able to view this page because not a staff memer
+		self.assertNotContains(response, 'Patient Statistical Report Analysis')
+
+		print '\t-Statistical Reports page successfully blocked if user is a - PATIENT'
+		print '\t-Changing permission to staff to test stats page'
+
+		self.patient_permission1.role = "staff"
+		self.patient_permission1.save()
+		request = self.factory.get(reverse_lazy('GenerateStats'))
+		request.user = self.patient_user1
+		response = GenerateStatsView(request)
+
+		print '\t-Permission changed to - STAFF'
+
+		self.assertContains(response, 'Patient Statistical Report Analysis')
+
+		print '\033[1;32m\nSTATISTICAL REPORTS ANALYSIS LOADED SUCCESSFULLY!\033[0m\n'
+
+
+		#Add some health conditions
+		self.patient_health_conditions1 = PatientHealthConditions.objects.create(
+
+			user = self.patient_object,
+			nausea_level = 10,
+			hunger_level = 8,
+			anxiety_level = 1, 
+			stomach_level = 3,
+			body_ache_level = 1,
+			chest_pain_level = 4
+			)
+		self.patient_health_conditions1.save()
+
+
+		#Schedule an appointment
+		medical_appointment_1 = PatientAppt.objects.create(
+			date = "02/20/2016",
+			doctor = self.doctor_obj,
+			pain_level = 10,
+			medical_conditions = "chest pain and stomach issues",
+			allergies = self.fill_patient_application.allergies,
+			user = self.patient_object,
+			current_health_conditions = self.patient_health_conditions1
+			)
+		medical_appointment_1.save()
+
+
+		print '\t-Testing patient analysis of health outcomes (should be 0% resolved)'
+
+		#Gather all the appointments
+		all_apts = PatientAppt.objects.all().count()
+		apts_not_resolved = PatientAppt.objects.filter(resolved=0).all().count()
+		apts_resolved = PatientAppt.objects.filter(resolved=1).all().count()
+
+		print '\t\t+ %d Resolved & %d Not Resolved with %d total appts'%(apts_resolved, apts_not_resolved, all_apts)
+		self.assertEqual(100, (apts_not_resolved/all_apts)*100)
+		print '\t\t+ Success! 100% of cases are currently unresolved, testing page output..'
+
+		request = self.factory.get(reverse_lazy('GenerateStats'))
+		request.user = self.patient_user1
+		response = GenerateStatsView(request)
+
+		self.assertContains(response, '<li>100.00% Unresolved Cases</li>')
+		self.assertContains(response, '<li>0.00% Resolved Cases</li>')
+
+		print '\t\t+ Page outputs: 100.00% Unresolved Cases & 0.00% Resolved Cases'
+
+		print '\t-Testing case percentage change when case becomes resolved'
+
+		medical_appointment_1.resolved = 1
+		medical_appointment_1.save()
+
+		print '\t-Testing patient analysis of health outcomes (should be 100% resolved)'
+
+		#Gather all the appointments
+		all_apts = PatientAppt.objects.all().count()
+		apts_not_resolved = PatientAppt.objects.filter(resolved=0).all().count()
+		apts_resolved = PatientAppt.objects.filter(resolved=1).all().count()
+
+		#Print resultant test data
+		print '\t\t+ %d Resolved & %d Not Resolved with %d total appts'%(apts_resolved, apts_not_resolved, all_apts)
+		self.assertEqual(100, (apts_resolved/all_apts)*100)
+		print '\t\t+ Success! 100% of cases are currently resolved, testing page output..'
+
+		#Load the stats page request
+		request = self.factory.get(reverse_lazy('GenerateStats'))
+		request.user = self.patient_user1
+		response = GenerateStatsView(request)
+
+		#Test the actual page output
+		self.assertContains(response, '<li>0.00% Unresolved Cases</li>')
+		self.assertContains(response, '<li>100.00% Resolved Cases</li>')
+
+		print '\t\t+ Page outputs: 0.00% Unresolved Cases & 100.00% Resolved Cases'
+
+		print '\033[1;32m\nANALYSIS OF PATIENT HEALTH OUTCOMES 100% PASSED!\033[0m\n'
+
+		print '\t-Currently tracking the admission rates for statistical analysis'
+
+		print '\t\t +Generating 1 unapproved patient and 2 approved patient for a 33.3% and 66.7% rate'
+
+		#Create another patient who isn't approved
+		#Yielf a 50/50 admission rate for approved and unapproved
+
+
+		self.patient_user2 = User.objects.create(username="pat2", password="pat2")
+
+		#Have the patient fill in their medical information to submit to the HSP staff
+		self.fill_patient_application = TempPatientData.objects.create(
+			user = self.patient_user2,
+			first_name = "patient2",
+			last_name = "patient2",
+			ssn = 600418394,
+			allergies = "cats",
+			address = "address 1",
+			medications = "Xanax",
+			insurance_provider = "StateFarm",
+			insurance_policy_number = 19938343434,
+			email_address = "patient2@patient2.com",
+			data_sent = "1",
+			race = "white",
+			income = "$10,001-$30,000",
+			gender = "male"
+			)
+
+		#Implement a patient role up to the newly registered (pending) patient
+		self.patient_object1 = Patient.objects.create(
+			fill_from_application = self.fill_patient_application,
+			user = self.patient_user2,
+			approved = 0
+			)
+
+		self.patient_permission1 = PermissionsRole.objects.create(
+			role = "patient",
+			user = self.patient_user2
+			)
+
+		print '\t\t +Unapproved patient generated successfully'
+
+		#Gather stats for patient admission data
+
+		total_patients = Patient.objects.all().count()
+		patients_approved = Patient.objects.filter(approved=1).all().count()
+		patients_unapproved = Patient.objects.filter(approved=0).all().count()
+
+		disapproval_percentage = (float(patients_unapproved)/float(total_patients))*100
+		approval_percentage = (float(patients_approved)/float(total_patients))*100
+
+
+		print '\t\t +There are %d approved and %d unapproved with %d total' %(patients_approved, patients_unapproved, total_patients)
+
+		print '\t\t +The approval percentage is %.2f and the denial percentage is %.2f'%(approval_percentage, disapproval_percentage)
+
+		#Load the stats page request
+		request = self.factory.get(reverse_lazy('GenerateStats'))
+		request.user = self.patient_user1
+		response = GenerateStatsView(request)
+
+		print '\033[1;32m\nSTATISTICAL REPORTS ADMISSION RATES OUTPUTTED SUCCESSFULLY!\033[0m\n'
+
+		print '\t-Running analysis on the types of patients we have in the IPIMS'
+		print '\t\t +Currently analyzing income type for patients..'
+		print '\t\t\t +Expected to have 66.67% $0-$10,00 and 33.33% $10,001-$30,000'
+
+		#Load the stats page request
+		request = self.factory.get(reverse_lazy('GenerateStats'))
+		request.user = self.patient_user1
+		response = GenerateStatsView(request)
+
+		self.assertContains(response, '<li>66.67% $0-$10,000</li>')
+		self.assertContains(response, '<li>33.33% $10,001-$30,000</li>')
+
+		print '\033[1;32m\nPATIENT TYPES FOR SALARY OUTPUTTED SUCCESSFULLY!\033[0m\n'
+
+		print '\t-Running analysis on the types of patients we have in the IPIMS'
+		print '\t\t +Currently analyzing gender type for patients..'
+		print '\t\t\t +Expected to have 33.33% Male, 33.33% Female and 33.33% Other'
+
+		#Load the stats page request
+		request = self.factory.get(reverse_lazy('GenerateStats'))
+		request.user = self.patient_user1
+		response = GenerateStatsView(request)
+
+		self.assertContains(response, '<li>33.33% Male</li>')
+		self.assertContains(response, '<li>33.33% Female</li>')
+		self.assertContains(response, '<li>0.00% Prefer Not To Say</li>')
+		self.assertContains(response, '<li>33.33% Other</li>')
+
+		print '\033[1;32m\nSTATISTICAL REPORTS GENDER TYPES OUTPUTTED SUCCESSFULLY!\033[0m\n'
 
