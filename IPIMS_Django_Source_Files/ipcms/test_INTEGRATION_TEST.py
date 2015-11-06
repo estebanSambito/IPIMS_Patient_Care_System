@@ -7,8 +7,8 @@ from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.models import AnonymousUser, User
 import time
-from ipcms.views import PatientPortalView
-from django.utils.deprecation import RemovedInDjango19Warning
+from ipcms.views import PatientPortalView, HealthConditionsView
+
 
 
 class Test_FullIntegrationTest(TestCase):
@@ -71,17 +71,6 @@ class Test_FullIntegrationTest(TestCase):
 		self.patient_object.save()
 		self.patient_permission.save()
 
-		self.patient_health_conditions = PatientHealthConditions.objects.create(
-
-			user = self.patient_object,
-			nausea_level = 10,
-			hunger_level = 8,
-			anxiety_level = 1, 
-			stomach_level = 3,
-			body_ache_level = 1,
-			chest_pain_level = 4
-			)
-		self.patient_health_conditions.save()
 
 
 
@@ -243,6 +232,21 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\n\n\n----------------------------------------------------------\nINTEGRATION TEST FOR SCHEDULE FUNCTIONALITY\n-----------------------------------------------------------'
 
+
+
+		self.patient_health_conditions = PatientHealthConditions.objects.create(
+
+			user = self.patient_object,
+			nausea_level = 10,
+			hunger_level = 8,
+			anxiety_level = 1, 
+			stomach_level = 3,
+			body_ache_level = 1,
+			chest_pain_level = 4
+			)
+		self.patient_health_conditions.save()
+
+
 		#Request an appointment to the healthcare provider
 		print '\t-Currently requesting a medical appointment from Dr. %s %s' %(self.doctor_obj.doctor_first_name, self.doctor_obj.doctor_last_name)
 
@@ -348,6 +352,168 @@ class Test_FullIntegrationTest(TestCase):
 		print '\033[30;42m\n-Successful Patient Appointment Resolution By Doctor\033[0m',
 		print '\033[30;42m\n-Successful Patient Appointment Viewed/Retrieved\033[0m',
 		print '\033[30;42m\n-Successful Patient Appoinment Managed (Updated/Removed)\033[0m'
+
+
+
+	def test_UpdateHealthConditionsFeatureIntegration(self):
+
+		print '\n\n\n----------------------------------------------------------\nINTEGRATION TEST FOR UPDATE HEALTH CONDITIONS FUNCTIONALITY\n-----------------------------------------------------------'
+
+		print '\t-Testing ability for patient to login & update health conds.'
+
+		#Login as the patient and ensure that the IPIMS wants us to update our health conditions
+		#Reload data
+		request = self.factory.get(reverse_lazy('Portal'))
+		request.user = self.patient_user
+
+		#Ensure patient was approved successfully
+		response = PatientPortalView(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		print '\t\t+Patient currently logged in successfully..'
+		print '\t\t+Testing patient health-conds update'
+
+		#Ensure the patient is viewing the page to force a health care update
+		self.assertContains(response, '<h3>Before Continuing Further, please <a href="/health_conditions">add your health conditions..</a></h3>')
+
+		#Update the health conditions of the patient
+		self.patient_health_conditions = PatientHealthConditions.objects.create(
+
+			user = self.patient_object,
+			nausea_level = 10,
+			hunger_level = 8,
+			anxiety_level = 1, 
+			stomach_level = 3,
+			body_ache_level = 1,
+			chest_pain_level = 4
+			)
+		self.patient_health_conditions.save()
+
+		#Login as the patient and ensure that the IPIMS wants us to update our health conditions
+		#Reload data
+		request = self.factory.get(reverse_lazy('Portal'))
+		request.user = self.patient_user
+
+		#Ensure patient was approved successfully
+		response = PatientPortalView(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		print '\033[1;32m\nPATIENT HEALTH CONDITIONS ADDED SUCCESSFULLY!\033[0m\n'
+
+		print '\t-Attempting to retrieve the patient health conditions to test validity'
+
+		#Login as the patient and ensure that the IPIMS wants us to update our health conditions
+		#Reload data
+		request = self.factory.get(reverse_lazy('Conditions'))
+		request.user = self.patient_user
+
+		#Ensure patient was approved successfully
+		response = HealthConditionsView(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		'''
+		ENSURING EACH INDIVIDUAL HEALTH CONDITION WAS STORED AND OUTPUTTED SUCCESSFULLY WITHIN THE IPIMS
+		'''
+
+		#Testing proper nausea level
+		self.assertContains(response, 'name="nausea_level" type="number" value="10"')
+		print '\t\t+Nausea level: Expected - 10, result - 10'
+
+		#Testing proper hunger level
+		self.assertContains(response, 'name="hunger_level" type="number" value="8"')
+		print '\t\t+Hunger level: Expected - 8, result - 8'
+
+		#Testing proper anxiety level
+		self.assertContains(response, 'name="anxiety_level" type="number" value="1"')
+		print '\t\t+Anxiety level: Expected - 1, result - 1'
+
+		#Testing proper stomach level
+		self.assertContains(response, 'name="stomach_level" type="number" value="3"')
+		print '\t\t+Stomach level: Expected - 3, result - 3'
+
+		#Testing proper body ache level
+		self.assertContains(response, 'name="body_ache_level" type="number" value="1"')
+		print '\t\t+Body Ache level: Expected - 1, result - 1'
+
+		#Testing proper chest pain level
+		self.assertContains(response, 'name="chest_pain_level" type="number" value="4"')
+		print '\t\t+Chest Pain level: Expected - 4, result - 4'
+
+		print '\033[1;32m\nPATIENT HEALTH CONDITIONS STORED AND VIEWED SUCCESSFULLY VIA IPIMS!\033[0m\n'
+
+		'''
+		ENSURE THE ALERT CAPABILITIES OF THE IPIMS ARE WORKING PROPERLY
+		'''
+
+		print('\t-Testing manual alert submission from patient to healthcare from portal page')
+
+		#Ensure that the alert has not been sent yet
+		request = self.factory.get(reverse_lazy('Portal'))
+		request.user = self.patient_user
+		response = PatientPortalView(request)
+
+		self.assertNotContains(response, 'Your alert has been sent to the hospital!')
+
+		print('\t\t+Successful analysis that the alert has not yet been sent.. sending alert now')
+
+		self.patient_object.alertSent = 1
+		self.patient_object.save()
+
+		print('\t\t+Alert now sent successfully, testing page response')
+
+		request = self.factory.get(reverse_lazy('Portal'))
+		request.user = self.patient_user
+		response = PatientPortalView(request)
+
+		self.assertContains(response, '<h4><b>Your alert has been sent to the hospital!</b></h4>')
+
+		print '\033[1;32m\nMANUAL SUBMISSION OF ALERT HAS BEEN SENT SUCCESSFULLY!\033[0m\n'
+
+		#Reset alert sent
+		self.patient_object.alertSent = 0
+		self.patient_object.save()
+
+		#Visit patient portal again as patient user
+		request = self.factory.get(reverse_lazy('Portal'))
+		request.user = self.patient_user
+		response = PatientPortalView(request)
+
+		#Alert send message disappears when the alert has been retracted from the system
+		self.assertNotContains(response, '<h4><b>Your alert has been sent to the hospital!</b></h4>')
+
+		print '\t-Testing IPIMS automatic analysis alert functionality'
+		print '\t\t+Currently increasing health conditions above (40) threshhold'
+
+		#Update the health conditions to exceed the threshhold
+		self.patient_health_conditions.nausea_level = 10
+		self.patient_health_conditions.hunger_level = 10
+		self.patient_health_conditions.anxiety_level = 10
+		self.patient_health_conditions.chest_pain_level = 10
+		self.patient_health_conditions.save()
+
+		print '\t\t+Patient health threshhold set.. Testing auto send alert feature'
+
+		request = self.factory.get(reverse_lazy('Portal'))
+		request.user = self.patient_user
+		response = PatientPortalView(request)
+
+		self.assertContains(response, '<h4><b>Your alert has been sent to the hospital!</b></h4>')
+
+		print '\033[1;32m\nAUTOMATIC SUBMISSION OF ALERT HAS BEEN SENT SUCCESSFULLY BY IPIMS!\033[0m\n'
+
+		#summary of the integration test that was ran
+		print '\033[30;42m\nUPDATE HEALTH CONDITIONS FEATURE INTEGRATION TEST SUMMARY:\033[0m'
+		print '\033[30;42m\n-Successful Addition of Patient Health Conditions\033[0m',
+		print '\033[30;42m\n-Successful Storage of Patient Health Conditions\033[0m',
+		print '\033[30;42m\n-Successful Retrieval of Patient Health Conditions\033[0m',
+		print '\033[30;42m\n-Successful Manual Alert Submission To Health Staff\033[0m',
+		print '\033[30;42m\n-Successful Automatic Alert Submission To Health Staff By IPIMS\033[0m'
 
 
 
