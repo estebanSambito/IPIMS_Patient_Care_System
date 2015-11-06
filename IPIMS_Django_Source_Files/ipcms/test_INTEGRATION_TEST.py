@@ -195,6 +195,7 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\n\t-Testing HSP Uploading Patient Medical Reports'
 
+		#Upload an associated medical report for the patient
 		patient_medical_history_upload = AddMedicalHistory.objects.create(
 			allergies="Dogs, Flees",
 			medical_conditions="Heart Pain",
@@ -206,8 +207,10 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\t-Testing printing patient medical data for %s %s' %(self.fill_patient_application.first_name, self.fill_patient_application.last_name)
 
+		#Grab a medical report for the selected patient
 		query_history_reports = AddMedicalHistory.objects.filter(patient=self.patient_object).get()
 
+		#View the stored data
 		if (AddMedicalHistory.objects.filter(patient=self.patient_object).exists()):
 			print '\t-Patient Medical History Upload From HSP Queried...'
 			medical_data = AddMedicalHistory.objects.filter(patient=self.patient_object).get()
@@ -218,6 +221,7 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\n\t-Testing HSP Updating Patient Medical Reports'
 
+		#Update the medical history information
 		if (AddMedicalHistory.objects.filter(patient=self.patient_object).exists()):
 			print '\t-Patient Medical History Upload From HSP Queried...'
 			print '\t-Adding "CATS" as allergy to patient medical history'
@@ -228,6 +232,7 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\033[1;32m\nPATIENT MEDICAL REPORTS UPDATED\033[0m\n'
 
+		#summary of integration test
 		print '\033[30;42m\nREGISTRATION FEATURE INTEGRATION TEST SUMMARY:\033[0m'
 		print '\033[30;42m\n-Successful Patient Registration (name, contact info, ssn, med history, allergies, insurance)\033[0m',
 		print '\033[30;42m\n-Successful HSP Medical Information Upload (allergies, medical conditions upload)\033[0m',
@@ -257,6 +262,7 @@ class Test_FullIntegrationTest(TestCase):
 																self.patient_health_conditions.hunger_level 
 																)
 
+		#Schedule an appointment
 		medical_appointment_1 = PatientAppt.objects.create(
 			date = "02/20/2016",
 			doctor = self.doctor_obj,
@@ -272,6 +278,7 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\t-Test changing status of the appointment from not resolved to resolved'
 
+		#Change resolution status of appointment
 		medical_appointment_1.resolved = 1
 
 		self.assertEqual(1, medical_appointment_1.resolved)
@@ -284,11 +291,14 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\t-There are currently (%d) appointments in the database' %(PatientAppt.objects.all().count())
 
+		#Query appointment for the patient
 		current_appointment = PatientAppt.objects.filter(user = self.patient_object).get()
 
+		#Check appt. existence.
 		if (PatientAppt.objects.filter(user = self.patient_object).exists()):
 			print '\t-Appointment for patient has been found; Attempting to view appointment details'
 
+			#Retrieve appt data. (view)
 			current_appt = PatientAppt.objects.filter(user = self.patient_object).get()
 			print '\t-Appointment object is %s' %(current_appt)
 			print '\t\t+Date: %s'%(current_appt.date)
@@ -311,10 +321,12 @@ class Test_FullIntegrationTest(TestCase):
 		print '\tAttempting to change the date of the appointment'
 		print '\tCurrent appointment date: %s' %(current_appt.date)
 
+		#Updating appt. data
 		current_appt.date = "03/14/2015"
 
 		print '\tCurrent appointment date: %s' %(current_appt.date)
 
+		#Assert change was valid
 		self.assertEqual(current_appt.date, "03/14/2015")
 
 		print '\033[1;32m\nPATIENT APPOINTMENT DATE CHANGED SUCCESSFULLY!\033[0m\n'
@@ -322,12 +334,15 @@ class Test_FullIntegrationTest(TestCase):
 		print '\tTesting the manage portion of the appointments scheduler..'
 		print '\tAttempting to delete the appointment'
 
+		#Remove appt.
 		current_appt.delete()
 
+		#Assert positive removal
 		self.assertEqual(0, PatientAppt.objects.all().count())
 
 		print '\033[1;32m\nPATIENT APPOINTMENT DELETED SUCCESSFULLY!\033[0m\n'
 
+		#summary of the integration test that was ran
 		print '\033[30;42m\nSCHEDULE APPOINTMENT FEATURE INTEGRATION TEST SUMMARY:\033[0m'
 		print '\033[30;42m\n-Successful Patient Appointment Creation (Doctor Chosen based on health)\033[0m',
 		print '\033[30;42m\n-Successful Patient Appointment Resolution By Doctor\033[0m',
