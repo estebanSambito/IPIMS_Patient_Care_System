@@ -127,6 +127,8 @@ class Test_FullIntegrationTest(TestCase):
 		self.patient_object.save()
 		self.patient_permission.save()
 
+		print '\n\t-Registering test patient within the database'
+
 		print '\033[1;32m\nPATIENT REGISTERED SUCCESSFULLY\033[0m\n'
 
 		print '\t-Testing that the patient hasn\'t been approved yet'
