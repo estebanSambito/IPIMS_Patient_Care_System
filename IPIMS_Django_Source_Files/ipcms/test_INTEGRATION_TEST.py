@@ -499,10 +499,12 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\t\t+Patient health threshhold set.. Testing auto send alert feature'
 
+		#Navigate back to the control panel
 		request = self.factory.get(reverse_lazy('Portal'))
 		request.user = self.patient_user
 		response = PatientPortalView(request)
 
+		#Test that the page ensures that the alert has been sent successfully!
 		self.assertContains(response, '<h4><b>Your alert has been sent to the hospital!</b></h4>')
 
 		print '\033[1;32m\nAUTOMATIC SUBMISSION OF ALERT HAS BEEN SENT SUCCESSFULLY BY IPIMS!\033[0m\n'
