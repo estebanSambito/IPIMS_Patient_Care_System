@@ -6,10 +6,24 @@ from pprint import pprint
 from django.shortcuts import redirect, get_object_or_404
 
 
+'''''''''''''''''''''''''''''''''
+
+	UNIT TESTING DOCUMENT
+
+'''''''''''''''''''''''''''''''''
+
 '''
 THIS TEST SUITE DEALS WITH THE TEST CREATION OF THE REGISTRATION OF DIFFERENT USERS
 '''
+
+# class TestLoaderLabel(TestCase):
+
+# 	def testLoadMe(self):
+# 		print '\033[1;34;42m\n\n\n\nBEGINNING UNIT TESTS\n\n\n\033[0m\n'
+
+
 class TestRegistrationFeature(TestCase):
+
 	def testCreationOfPatient(self):
 		print '--------------------------------------\nTESTING PATIENT REGISTRATION CREATION\n---------------------------------------'
 
@@ -63,6 +77,7 @@ class TestRegistrationFeature(TestCase):
 		print '\tRyan Schachte (PATIENT) Approved'
 
 	def testCreationOfHSP(self):
+
 		print '--------------------------------------\nTESTING HSP REGISTRATION CREATION\n---------------------------------------'
 		print '\tCreating the HSP Staff User Account'
 

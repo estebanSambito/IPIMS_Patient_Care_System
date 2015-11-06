@@ -29,7 +29,7 @@ STAFF_APPROVAL_ROLES = ('admin', 'doctor', 'staff', 'nurse', 'lab')
 def AlertSender(request):
 	#This method should be responsible for sending an alert to the doctor and HSP staff when the patient requests and alert to be sent
 
-	print ('inside alert sender')
+	# #print ('inside alert sender')
 	patient_model = Patient.objects.get(user__username=request.user.username)
 	health_conditions_model = PatientHealthConditions.objects.get(user=patient_model)
 	patient_data_information = TempPatientData.objects.get(user__username=request.user.username)
@@ -196,8 +196,8 @@ def PatientPortalView(request):
 	#Check to see if the user has logged into the system or not
 	if request.user.is_authenticated():
 
-		if patient_model.objects.filter(user__username=request.user.username)[:1].exists():
-			patient = patient_model.objects.filter(user__username=request.user.username)[:1].get()
+		if patient_model.objects.filter(user=request.user.id)[:1].exists():
+			patient = patient_model.objects.filter(user=request.user.id)[:1].get()
 
 			if Alert.objects.filter(alert_patient=patient)[:1].exists():
 				alert_sent = 1
@@ -260,16 +260,16 @@ def PatientPortalView(request):
 		authenticated = True
 
 		#Attempt a DB query on the request object
-		if permissionModel.objects.filter(user__username=request.user.username)[:1].exists():
+		if permissionModel.objects.filter(user=request.user.id)[:1].exists():
 
 			#If request object from query exists, create a variable assignment on that object
-			permissionRoleForUser = permissionModel.objects.filter(user__username=request.user.username)[:1].get()
+			permissionRoleForUser = permissionModel.objects.filter(user=request.user.id)[:1].get()
 
 			#If the logged in person is a patient, grab request object, make a query and grab the approval integer
-			if patientModel.objects.filter(user__username=request.user.username)[:1].exists():
+			if patientModel.objects.filter(user=request.user.id)[:1].exists():
 
 				#Get an integer declaraction for the approval of the user
-				approvalSwitch = patientModel.objects.filter(user__username=request.user.username)[:1].get()
+				approvalSwitch = patientModel.objects.filter(user=request.user.id)[:1].get()
 
 			#If the person is a hospital member, then they will automatically be considered approved
 			if (permissionRoleForUser.role in STAFF_APPROVAL_ROLES):
@@ -282,7 +282,7 @@ def PatientPortalView(request):
 		permissionRoleForUser = ""
 
 	tempUserInformation = ""
-	if tempModel.objects.filter(user=request.user)[:1].exists():
+	if tempModel.objects.filter(user=request.user.id)[:1].exists():
 		tempUserInformation = tempModel.objects.filter(user=request.user)[:1].get()
 
 	form = TempPatientDataForm()
@@ -338,7 +338,6 @@ def PatientPortalView(request):
 	temp_patient_data_list = []
 
 
-
 	for each_patient in get_all_unapproved_patients:
 		if (not Patient.objects.filter(fill_from_application = each_patient).exists()):
 			unapproved_patient_list.append(each_patient)
@@ -348,22 +347,22 @@ def PatientPortalView(request):
 	if not permissionRoleForUser == "pending":
 		if permissionRoleForUser.role == 'patient':
 			patient_date_time_set = Patient.objects.filter(fill_from_application__user=request.user).get()
-			print patient_date_time_set.date_created
+			#print patient_date_time_set.date_created
 			if patient_date_time_set.date_created == '9-20-1995':
 				d = datetime.date.today()
 				user_date_add = datetime.datetime.now()
-				print ' is now'
+				#print ' is now'
 				patient_date_time_set.date_created = user_date_add
 				patient_date_time_set.save()
-				print patient_date_time_set.date_created
-				print 'SET'
+				#print patient_date_time_set.date_created
+				#print 'SET'
 
 	if not permissionRoleForUser == "pending":
 		if permissionRoleForUser.role == 'patient':
 
 			#Query the medication pickups for the patient
 			medications_for_patient = EMedication.objects.filter(reminder=0, patient__user=request.user).all()
-			print medications_for_patient
+			#print medications_for_patient
 
 			if len(medications_for_patient) == 0:
 				medications_for_patient = "No Medications Pending"
@@ -624,8 +623,7 @@ def UpdateAccountView(request):
 		if form.is_valid():
 
 			form.save()
-		else:
-			print (form.errors)
+
 		return HttpResponseRedirect('/accounts/portal/update_account/')
 
 
@@ -694,7 +692,8 @@ def view_ApptHistory(request):
 def GenerateStatsView(request):
 
 
-	roles = PermissionsRole.objects.filter(user__username=request.user.username)[:1].get()
+	roles = PermissionsRole.objects.filter(user=request.user.id)[:1].get()
+	# roles = "doctor"
 
 	#GENDER
 	total_patients = TempPatientData.objects.filter().count()
@@ -787,7 +786,7 @@ def GenerateStatsView(request):
 	for entry in entries:
 		accepted_count_last_30_days+=1
 
-	print 'Accepted: %d and accepted_count_last_30_days: %d\n' %(all_accepted, accepted_count_last_30_days)
+	#print 'Accepted: %d and accepted_count_last_30_days: %d\n' %(all_accepted, accepted_count_last_30_days)
 
 	context = {
 
@@ -835,8 +834,7 @@ def PatientDataView(request):
 		patients = PatientAppt.objects.filter(doctor=current_doctor).all()
 		if PatientAppt.objects.filter(doctor=current_doctor).count() == 0:
 			patients = 0
-		else:
-			print (patients)
+
 
 
 		final_patient_list = []
@@ -888,7 +886,7 @@ def ResolvedPatientAjaxView(request):
 	if request.is_ajax() or request.method == 'POST':
 
 		primary_key_val = request.POST.get('appt_id')
-		print (primary_key_val)
+		#print (primary_key_val)
 
 		if PatientAppt.objects.filter(pk=primary_key_val).exists():
 			current_appt = PatientAppt.objects.filter(pk=primary_key_val).get()
@@ -933,7 +931,7 @@ def MedicalHistoryView(request):
 
 		patient_primary_key = request.POST.get('pk_patient', '')
 
-		print patient_primary_key
+		#print patient_primary_key
 
 		patient_appts = PatientAppt.objects.filter(id=patient_primary_key).all()
 
@@ -953,7 +951,7 @@ def MedicalHistoryView(request):
 
 			hsp_med_history = AddMedicalHistory.objects.filter(patient=patient_obj).all()
 
-			print hsp_med_history
+			#print hsp_med_history
 
 			condition_list = hsp_med_history.medical_conditions.split(',')
 
@@ -984,19 +982,19 @@ def MedicalHistoryView(request):
 		elif (Patient.objects.filter(pk=patient_primary_key).exists()):
 			current_patient = Patient.objects.filter(pk=patient_primary_key).get()
 
-			print ('EXISTS')
+			#print ('EXISTS')
 			current_patient = Patient.objects.filter(id=patient_primary_key).get()
-			print ('assigned based on user key')
+			#print ('assigned based on user key')
 		elif (Patient.objects.filter(pk=patient_primary_key).exists()):
 			current_patient = Patient.objects.filter(pk=patient_primary_key).get()
-			print ('assigned based on primary key')
+			#print ('assigned based on primary key')
 
 
 		if (AddMedicalHistory.objects.filter(patient=current_patient).exists()):
 
 			hsp_med_history = AddMedicalHistory.objects.filter(patient=current_patient).all()
 
-			print hsp_med_history
+			#print hsp_med_history
 
 		patient_appts = PatientAppt.objects.filter(user=current_patient).all()
 
@@ -1011,8 +1009,8 @@ def MedicalHistoryView(request):
 		medications = medications.split(',')
 
 		doc_meds = EMedication.objects.filter(patient=current_patient).all()
-		print 'The doc meds are',
-		print doc_meds
+		#print 'The doc meds are',
+		#print doc_meds
 
 
 		context = {
@@ -1052,7 +1050,7 @@ def ProcessPatientApproval(request):
 	#Query the temp_patient_data from the primary key
 	if request.method == "POST" and 'pk_pending' in request.POST:
 		primary_key_val = request.POST.get('pk_pending', '')
-		print primary_key_val
+		#print primary_key_val
 		temp_object = TempPatientData.objects.filter(user_id=primary_key_val).get()
 
 		#Create a new patient object 
@@ -1188,7 +1186,7 @@ def display_all_lab_results(request):
 	if PermissionsRole.objects.filter(user__username=request.user.username)[:1].exists():
 		roles = PermissionsRole.objects.filter(user__username=request.user.username)[:1].get()
 
-	print all_lab_tests
+	#print all_lab_tests
 
 	context = {
 
@@ -1226,8 +1224,8 @@ def edit_lab_results(request):
 
 		model_instance = LabReport.objects.get(pk=lab_found)
 
-		print 'The current lab model that has been found is: \n'
-		print model_instance
+		#print 'The current lab model that has been found is: \n'
+		#print model_instance
 
 		primary_key_val = model_instance
 
@@ -1283,7 +1281,7 @@ def ViewAllPatientData(request):
 
 	temp_patient_data = Patient.objects.all()
 
-	print temp_patient_data
+	#print temp_patient_data
 
 	context = {
 
