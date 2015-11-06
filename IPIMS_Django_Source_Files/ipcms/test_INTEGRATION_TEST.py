@@ -517,5 +517,66 @@ class Test_FullIntegrationTest(TestCase):
 		print '\033[30;42m\n-Successful Manual Alert Submission To Health Staff\033[0m',
 		print '\033[30;42m\n-Successful Automatic Alert Submission To Health Staff By IPIMS\033[0m'
 
+	def test_ServiceToDoctorsFeatureIntegration(self):
 
+		print '\n\n\n----------------------------------------------------------\nINTEGRATION TEST FOR SERVICE TO DOCTORS FUNCTIONALITY\n-----------------------------------------------------------'
+
+
+		print 'THIS NEEDS TO BE CODED STILL!'
+
+		'''
+		(First Generate some appointments to view in the IPIMS)
+
+		Ensure the relevant doctor can view the appointments
+		Ability for doctor/nurse to update the health conditions
+		Ability for doctor to resolve a patient case 
+		Ability for doctor to prescribe medications 
+		Ability for doctor to view patient lab records (Will need to create lab record instantiation)
+		'''
+
+	def test_ServiceToStaffFeatureIntegration(self):
+
+		print '\n\n\n----------------------------------------------------------\nINTEGRATION TEST FOR SERVICE TO STAFF FUNCTIONALITY\n-----------------------------------------------------------'
+
+
+		print 'THIS NEEDS TO BE CODED STILL!'
+
+
+		'''
+		Test retrieval of patient information
+		View All Patients
+		View Patient Medical Information
+		View Patient Prescription
+		Update Patient Medical History
+		'''
+
+	def test_LabRecordsFeatureIntegration(self):
+
+		print '\n\n\n----------------------------------------------------------\nINTEGRATION TEST FOR LAB RECORDS FUNCTIONALITY\n-----------------------------------------------------------'
+
+
+		print 'THIS NEEDS TO BE CODED STILL!'
+
+		'''
+		Test creation of lab record
+		Test viewing of lab record
+		Test editing of lab record
+		Test removal of lab record
+
+		'''
+
+	def test_StatsReportsFeatureIntegration(self):
+
+		print '\n\n\n----------------------------------------------------------\nINTEGRATION TEST FOR STATISTICAL REPORTS FUNCTIONALITY\n-----------------------------------------------------------'
+
+
+		print 'THIS NEEDS TO BE CODED STILL!'
+
+		'''
+		Health outcome analysis
+		Admission rate
+		Patient types
+		Patient populations
+
+		'''
 
