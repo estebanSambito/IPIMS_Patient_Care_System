@@ -235,7 +235,6 @@ class Test_FullIntegrationTest(TestCase):
 		print '\n\n\n----------------------------------------------------------\nINTEGRATION TEST FOR SCHEDULE FUNCTIONALITY\n-----------------------------------------------------------'
 
 
-
 		self.patient_health_conditions = PatientHealthConditions.objects.create(
 
 			user = self.patient_object,
@@ -579,6 +578,34 @@ class Test_FullIntegrationTest(TestCase):
 		Admission rate
 		Patient types
 		Patient populations
-
 		'''
+
+		print '\t-Generating users to test against'
+
+		#Generate 5 patients and begin doing statistical analysis and tests on the expected and actual output
+		self.patient_user1 = User.objects.create(username="pat1", password="pat1")
+
+		#Have the patient fill in their medical information to submit to the HSP staff
+		self.fill_patient_application = TempPatientData.objects.create(
+			user = self.patient_user1,
+			first_name = "patient1",
+			last_name = "patient1",
+			ssn = 600418394,
+			allergies = "cats",
+			address = "address 1",
+			medications = "Xanax",
+			insurance_provider = "StateFarm",
+			insurance_policy_number = 19938343434,
+			email_address = "patient1@patient1.com",
+			data_sent = "1",
+			race = "black",
+			income = "$0-$10,000"
+			)
+
+		#Implement a patient role up to the newly registered (pending) patient
+		self.patient_object = Patient.objects.create(
+			fill_from_application = self.fill_patient_application,
+			user = self.patient_user1,
+			approved = 1
+			)
 
