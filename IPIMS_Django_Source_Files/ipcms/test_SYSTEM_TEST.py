@@ -566,7 +566,12 @@ class Test_SystemComplianceTest(TestCase):
 		TOTAL_SERVICE_TO_DOCTORS_TIME = 0
 
 		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR SERVICE TO DOCTORS FEATURE\n-----------------------------------------------------------\033[0m\n'
-
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Testing Valid Load For Analysis of:")
+		print '\t\t\t+ \033[1;33mEnsure the relevant doctor can view the appointments\033[0m'
+		print '\t\t\t+ \033[1;33mAbility for doctor/nurse to update the health conditions\033[0m'
+		print '\t\t\t+ \033[1;33mAbility for doctor to resolve a patient case\033[0m'
+		print '\t\t\t+ \033[1;33mAbility for doctor to prescribe medications\033[0m'
+		print '\t\t\t+ \033[1;33mAbility for doctor to view patient lab records\033[0m'
 		separator()
 
 		#Build the user in the system
