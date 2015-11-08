@@ -7,7 +7,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.models import AnonymousUser, User
 import time
-from ipcms.views import PatientPortalView, HealthConditionsView, SuccessTestView
+from ipcms.views import PatientPortalView, HealthConditionsView, SuccessTestView, GenerateStatsView
 from django.views import generic
 
 #Function to output color codes of the efficiency of the response time for each of the features in the IPIMS
@@ -536,7 +536,6 @@ class Test_SystemComplianceTest(TestCase):
 		self.assertEqual(response.status_code, 200)
 
 		#Now load the actual portal view after registration
-		time.sleep(3)
 		response_time = time.time() - response_time_begin
 
 
@@ -547,5 +546,153 @@ class Test_SystemComplianceTest(TestCase):
 		separator()
 
 		print '\033\n[44mTOTAL TIME: %.5f seconds\033[0m'%(TOTAL_SCHEDULE_APPT_TIME)
+
+
+	def test_ServiceToDoctorsFeature(self):
+
+		TOTAL_SERVICE_TO_DOCTORS_TIME = 0
+
+		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR SERVICE TO DOCTORS FEATURE\n-----------------------------------------------------------\033[0m\n'
+
+		separator()
+
+
+	def test_ServiceToStaffFeature(self):
+
+		TOTAL_SERVICE_TO_STAFF_TIME = 0
+
+		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR SERVICE TO STAFF FEATURE\n-----------------------------------------------------------\033[0m\n'
+
+		separator()
+
+
+	def test_ServiceToLabRecordsFeature(self):
+
+		TOTAL_SERVICE_TO_LAB_TIME = 0
+
+		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR SERVICE TO LAB FEATURE\n-----------------------------------------------------------\033[0m\n'
+
+		separator()
+
+	def test_GenerationHealthStatsFeature(self):
+
+		TOTAL_STATS_FEATURE = 0
+
+		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR STATISTICAL ANALYSIS FEATURE\n-----------------------------------------------------------\033[0m\n'
+
+		#Need to basically query all of the data for the patients in the database and then load the page and see if the response is good
+		#Instantiate the objects here
+
+		separator()
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Testing Valid Load For Analysis of:")
+		print '\t\t\t+ \033[1;33mAnalysis of Health Outcomes\033[0m'
+		print '\t\t\t+ \033[1;33mTracking of Admission Rates\033[0m'
+		print '\t\t\t+ \033[1;33mAnalysis of Types of Patients\033[0m'
+		print '\t\t\t+ \033[1;33mAnalysis of Patient Populations\033[0m'
+		#Build the user in the system
+		response_time_begin = time.time()
+
+		self.patient_user1 = User.objects.create(username="pat_user_test1", password="pat_pass_test1")
+
+		#Have the patient fill in their medical information to submit to the HSP staff
+		self.fill_patient_application1 = TempPatientData.objects.create(
+			user = self.patient_user1,
+			first_name = "John",
+			last_name = "Larsen",
+			ssn = 600418394,
+			allergies = "Soda",
+			address = "2417 E. Laurel St. Mesa, AZ 85213",
+			medications = "Xanax",
+			insurance_provider = "StateFarm",
+			insurance_policy_number = 19938343434,
+			email_address = "jacob1@jacob.com",
+			data_sent = "1",
+			race = "black",
+			income = "$0-$10,000",
+			gender = "other"
+			)
+
+		#Implement a patient role up to the newly registered (pending) patient
+		self.patient_object1 = Patient.objects.create(
+			fill_from_application = self.fill_patient_application1,
+			user = self.patient_user1,
+			approved = 1
+			)
+
+		#Implement a permission role access to the patient
+		self.patient_permission = PermissionsRole.objects.create(
+			role = "patient",
+			user = self.patient_user1
+			)
+
+		self.patient_user1.save()
+		self.fill_patient_application1.save()
+		self.patient_object1.save()
+		self.patient_permission.save()
+
+
+		self.patient_user2 = User.objects.create(username="pat_user_test2", password="pat_pass_test2")
+
+		#Have the patient fill in their medical information to submit to the HSP staff
+		self.fill_patient_application2 = TempPatientData.objects.create(
+			user = self.patient_user2,
+			first_name = "John",
+			last_name = "Larsen",
+			ssn = 600418394,
+			allergies = "Soda",
+			address = "2417 E. Laurel St. Mesa, AZ 85213",
+			medications = "Xanax",
+			insurance_provider = "StateFarm",
+			insurance_policy_number = 19938343434,
+			email_address = "jacob1@jacob.com",
+			data_sent = "1",
+			race = "black",
+			income = "$0-$10,000",
+			gender = "other"
+			)
+
+		#Implement a patient role up to the newly registered (pending) patient
+		self.patient_object2 = Patient.objects.create(
+			fill_from_application = self.fill_patient_application2,
+			user = self.patient_user2,
+			approved = 1
+			)
+
+		#Implement a permission role access to the patient
+		self.patient_permission = PermissionsRole.objects.create(
+			role = "patient",
+			user = self.patient_user2
+			)
+
+		self.patient_user2.save()
+		self.fill_patient_application2.save()
+		self.patient_object2.save()
+		self.patient_permission.save()
+
+		#Load the stats page
+		request = self.factory.get(reverse_lazy('GenerateStats'))
+
+		#Set the current user request object
+		request.user = self.patient_user
+
+		#Store the view response
+		response = GenerateStatsView(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+
+
+		response_time = time.time() - response_time_begin
+
+		TOTAL_STATS_FEATURE += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+
+		print '\033\n[44mTOTAL TIME: %.5f seconds\033[0m'%(TOTAL_STATS_FEATURE)
+
+
 
 
