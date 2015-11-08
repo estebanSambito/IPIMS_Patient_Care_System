@@ -8,7 +8,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.models import AnonymousUser, User
 import time
-from ipcms.views import PatientPortalView, HealthConditionsView, GenerateStatsView, ViewAllPatientData
+from ipcms.views import PatientPortalView, HealthConditionsView, GenerateStatsView, ViewAllPatientData, display_all_lab_results
 
 
 
@@ -541,8 +541,6 @@ class Test_FullIntegrationTest(TestCase):
 		print '\n\n\n----------------------------------------------------------\nINTEGRATION TEST FOR SERVICE TO DOCTORS FUNCTIONALITY\n-----------------------------------------------------------'
 
 
-		print 'THIS NEEDS TO BE CODED STILL!'
-
 		'''
 		(First Generate some appointments to view in the IPIMS)
 
@@ -552,6 +550,190 @@ class Test_FullIntegrationTest(TestCase):
 		Ability for doctor to prescribe medications 
 		Ability for doctor to view patient lab records (Will need to create lab record instantiation)
 		'''
+
+		print '\t-Testing ability for nurse/doctor to update relevant health conditions'
+
+		self.patient_user3 = User.objects.create(username="pat_user_test3", password="pat_pass_test3")
+
+		#Have the patient fill in their medical information to submit to the HSP staff
+		self.fill_patient_application3 = TempPatientData.objects.create(
+			user = self.patient_user3,
+			first_name = "John",
+			last_name = "Larsen",
+			ssn = 600418394,
+			allergies = "Soda",
+			address = "2417 E. Laurel St. Mesa, AZ 85213",
+			medications = "Xanax",
+			insurance_provider = "StateFarm",
+			insurance_policy_number = 19938343434,
+			email_address = "jacob@jacob.com",
+			data_sent = "1",
+			race = "black",
+			income = "$0-$10,000",
+			gender = "other"
+			)
+
+		#Implement a patient role up to the newly registered (pending) patient
+		self.patient_object3 = Patient.objects.create(
+			fill_from_application = self.fill_patient_application3,
+			user = self.patient_user3,
+			approved = 1
+			)
+
+		#Implement a permission role access to the patient
+		self.patient_permission3 = PermissionsRole.objects.create(
+			role = "patient",
+			user = self.patient_user3
+			)
+
+		self.patient_user3.save()
+		self.fill_patient_application3.save()
+		self.patient_object3.save()
+		self.patient_permission3.save()
+
+
+		#Update the health conditions of the patient
+		self.patient_health_conditions3 = PatientHealthConditions.objects.create(
+
+			user = self.patient_object3,
+			nausea_level = 10,
+			hunger_level = 8,
+			anxiety_level = 1, 
+			stomach_level = 3,
+			body_ache_level = 1,
+			chest_pain_level = 4
+			)
+		self.patient_health_conditions3.save()
+
+		relevant_appt = PatientAppt.objects.create(
+			date = "03/14/2015",
+			doctor= self.doctor_obj,
+			pain_level = 10,
+			medical_conditions="n/a",
+			allergies="cats",
+			user = self.patient_object3,
+			current_health_conditions=self.patient_health_conditions3,
+
+
+			)
+		relevant_appt.save()
+
+		current_appt = PatientAppt.objects.filter(user=self.patient_object3).get()
+
+		print '\t-Current appointment has been queried for: %s %s' %(current_appt.user.fill_from_application.first_name, current_appt.user.fill_from_application.last_name)
+		print '\t-Appointment Data Is:'
+		print '\t\t +Date: %s'%(current_appt.date)
+		print '\t\t +Doctor: Dr. %s %s'%(current_appt.doctor.doctor_first_name, current_appt.doctor.doctor_last_name)
+		print '\t\t +pain_level: %d'%(current_appt.pain_level)
+		print '\t\t +medical_conditions: %s'%(current_appt.medical_conditions)
+		print '\t\t +user: %s'%(current_appt.user)
+		print '\t\t +current_health_conditions: %s'%(current_appt.current_health_conditions)
+
+		print '\033[1;32m\nAPPOINTMENT VIEWED SUCCESSFULLY!\033[0m\n'
+
+		print '\t-Attempting to update data'
+
+		current_appt.pain_level = 0
+		current_appt.save()
+
+		self.assertEqual(0, current_appt.pain_level)
+		print '\t-Appt updated from 10 to 0 ... '
+
+		print '\033[1;32m\nAPPOINTMENT UPDATED SUCCESSFULLY!\033[0m\n'
+
+		print '\tAttempting to validate ability to resolve a patient case...'
+
+		self.patient_permission3.role = "staff"
+		self.patient_permission3.save()
+		request = self.factory.get(reverse_lazy('GenerateStats'))
+		request.user = self.patient_user3
+		response = GenerateStatsView(request)
+
+
+		print '\tCurrent stats response relays 100% unresolved case rate..'
+		print '\tResolving case to changing that to 0%'
+
+		current_appt.resolved = 1
+		current_appt.save()
+
+		request = self.factory.get(reverse_lazy('GenerateStats'))
+		request.user = self.patient_user3
+		response = GenerateStatsView(request)
+
+		self.assertNotContains(response, '<li>100.00% Unresolved Cases</li>')
+		self.assertContains(response, '<li>100.00% Resolved Cases</li>')
+
+		print '\033[1;32m\nAPPOINTMENT RESOLUTION CAPABILITIES SUCCESSFUL!\033[0m\n'
+
+		print '\t-Testing ability to prescribe medication to user..'
+
+		self.patient_permission3.role="patient"
+		self.patient_permission3.save()
+
+		#Navigate back to the control panel
+		request = self.factory.get(reverse_lazy('Portal'))
+		request.user = self.patient_user3
+		response = PatientPortalView(request)
+
+		self.assertContains(response, 'No Medications Pending')
+
+		print '\t\t +Patient currently has no medications..'
+		print '\t-Prescribing xanax to patient..'
+
+		e_med_maker = EMedication.objects.create(
+			patient = self.patient_object3,
+			medication_name = "xanax",
+			prescribed_by_doctor=self.doctor_obj
+			)
+
+		e_med_maker.save()
+
+		#Navigate back to the control panel
+		request = self.factory.get(reverse_lazy('Portal'))
+		request.user = self.patient_user3
+		response = PatientPortalView(request)
+
+		self.assertContains(response, '<form method="POST" action="/accounts/portal/clear/">')
+
+		print '\033[1;32m\nE-PRESCRIPTION CAPABILITIES SUCCESSFUL!\033[0m\n'
+
+		print '\t-Testing Lab Viewing Capabilities'
+
+
+		new_lab_report = LabReport.objects.create(
+			lab_patient = self.patient_object3,
+			lab_results = "positive",
+			lab_test = "Blood Tests",
+			lab_notes = "seek medical attention",
+			lab_tech = self.lab_staff_tech
+			)
+
+		new_lab_report.save()
+
+		print '\t-Lab report is created'
+
+		# display_all_lab_results
+
+		self.patient_permission3.role="doctor"
+		self.patient_permission3.save()
+
+		#Navigate back to the control panel
+		request = self.factory.get(reverse_lazy('display_all_lab_results'))
+		request.user = self.patient_user3
+		response = display_all_lab_results(request)
+
+		self.assertContains(response, 'Blood Tests')
+		self.assertContains(response, self.patient_object3.fill_from_application.first_name)
+		self.assertContains(response, self.patient_object3.fill_from_application.last_name)
+
+		print '\033[1;32m\nLAB RECORD CAPABILITIES SUCCESSFUL!\033[0m\n'
+
+		#summary of the integration test that was ran
+		print '\033[30;42m\nSERVICE TO DOCTORS FEATURE SUMMARY:\033[0m'
+		print '\033[30;42m\n-Successful Ability To Update Patient Health Conditions\033[0m',
+		print '\033[30;42m\n-Successful Patient Appointment Resolution\033[0m',
+		print '\033[30;42m\n-Successful E-Medication Prescription Abilities\033[0m',
+		print '\033[30;42m\n-Successful Retreival of Patient Lab Record Information\033[0m',
 
 	def test_ServiceToStaffFeatureIntegration(self):
 
