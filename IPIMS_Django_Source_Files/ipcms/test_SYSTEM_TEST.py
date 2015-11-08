@@ -91,8 +91,9 @@ class Test_SystemComplianceTest(TestCase):
 	def test_PatientFeature(self):
 		TOTAL_PATIENT_FEATURE_TIME = 0
 
-		print '\033[1;45m\n----------------------------------------------------------\n (1) SYSTEM TEST FOR REGISTRATION FEATURE\n-----------------------------------------------------------\033[0m\n'
+		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR REGISTRATION FEATURE\n-----------------------------------------------------------\033[0m\n'
 
+		separator()
 		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Patient Registration")
 
 		#Run the registration code here
@@ -251,15 +252,17 @@ class Test_SystemComplianceTest(TestCase):
 		TOTAL_PATIENT_FEATURE_TIME += response_time
 		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
 		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+		separator()
 
 		print '\033\n[44mTOTAL TIME: %.5f seconds\033[0m'%(TOTAL_PATIENT_FEATURE_TIME)
 
 	def test_ScheduleApptFeature(self):
 
-		TOTAL_PATIENT_FEATURE_TIME = 0
+		TOTAL_SCHEDULE_APPT_TIME = 0
 
-		print '\033[1;45m\n----------------------------------------------------------\n (2) SYSTEM TEST FOR SCHEDULE FEATURE\n-----------------------------------------------------------\033[0m\n'
+		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR SCHEDULE FEATURE\n-----------------------------------------------------------\033[0m\n'
 
+		separator()
 		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Schedule Appointment")
 
 		#Build the user in the system
@@ -303,6 +306,8 @@ class Test_SystemComplianceTest(TestCase):
 
 		#Now load the actual portal view after registration
 		response_time = time.time() - response_time_begin
+
+		TOTAL_SCHEDULE_APPT_TIME += response_time
 		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
 		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
 		separator()
@@ -328,6 +333,8 @@ class Test_SystemComplianceTest(TestCase):
 
 		#Now load the actual portal view after registration
 		response_time = time.time() - response_time_begin
+
+		TOTAL_SCHEDULE_APPT_TIME += response_time
 		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
 		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
 
@@ -363,15 +370,182 @@ class Test_SystemComplianceTest(TestCase):
 
 		#Now load the actual portal view after registration
 		response_time = time.time() - response_time_begin
+
+		TOTAL_SCHEDULE_APPT_TIME += response_time
 		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
 		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
 
-	def test_ScheduleApptFeature(self):
+		separator()
 
-		print '\033[1;45m\n----------------------------------------------------------\n (3) UPDATE HEALTH CONDITIONS FEATURE\n-----------------------------------------------------------\033[0m\n'
+		print '\033\n[44mTOTAL TIME: %.5f seconds\033[0m'%(TOTAL_SCHEDULE_APPT_TIME)
+
+	def test_UpdateHealthConditionsFeature(self):
+
+		TOTAL_SCHEDULE_APPT_TIME = 0
+
+		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR UPDATE HEALTH CONDITIONS FEATURE\n-----------------------------------------------------------\033[0m\n'
+
+		separator()
 
 		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Create Health Conditions")
 
+		#Build the user in the system
+		response_time_begin = time.time()
 
+		#Create the health conditions of the patient
+		self.patient_health_conditions = PatientHealthConditions.objects.create(
+
+			user = self.patient_object,
+			nausea_level = 10,
+			hunger_level = 8,
+			anxiety_level = 1, 
+			stomach_level = 3,
+			body_ache_level = 1,
+			chest_pain_level = 4
+			)
+		self.patient_health_conditions.save()
+
+		#Load the patient portal
+		request = self.factory.get(reverse_lazy('SuccessTestView'))
+
+		#Set the current user request object
+		request.user = self.patient_user
+
+		#Store the view response
+		response = SuccessTestView(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		#Now load the actual portal view after registration
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SCHEDULE_APPT_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Update Health Conditions")
+
+		#Build the user in the system
+		response_time_begin = time.time()
+
+		#Get the conditions 
+		health_conds = PatientHealthConditions.objects.filter(user = self.patient_object).get()
+
+		#Patient retrieved
+		self.patient_health_conditions.nausea_level = 0
+		self.patient_health_conditions.hunger_level = 1
+		self.patient_health_conditions.anxiety_level = 6
+		self.patient_health_conditions.stomach_level = 5
+		self.patient_health_conditions.body_ache_level = 2
+		self.patient_health_conditions.chest_pain_level = 5
+
+		self.patient_health_conditions.save()
+
+		#Patient health conditions updated successfully
+
+		#Load the patient portal
+		request = self.factory.get(reverse_lazy('SuccessTestView'))
+
+		#Set the current user request object
+		request.user = self.patient_user
+
+		#Store the view response
+		response = SuccessTestView(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		#Now load the actual portal view after registration
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SCHEDULE_APPT_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Send Manual Alert IPIMS")
+
+		#Build the user in the system
+		response_time_begin = time.time()
+
+		current_patient = Patient.objects.filter(user=request.user).get()
+
+		#patient gathered
+
+		current_patient.alertSent = 1
+		current_patient.save()
+
+		#alert sent successfully
+
+		#Load the patient portal
+		request = self.factory.get(reverse_lazy('SuccessTestView'))
+
+		#Set the current user request object
+		request.user = self.patient_user
+
+		#Store the view response
+		response = SuccessTestView(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		#Now load the actual portal view after registration
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SCHEDULE_APPT_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Send Automatic IPIMS Alert")
+
+		#Build the user in the system
+		response_time_begin = time.time()
+
+		existent_conditions = PatientHealthConditions.objects.filter(user = self.patient_object).get()
+		existent_conditions.delete()
+
+		#Create the health conditions of the patient
+		self.patient_health_conditions = PatientHealthConditions.objects.create(
+
+			user = self.patient_object,
+			nausea_level = 10,
+			hunger_level = 10,
+			anxiety_level = 10, 
+			stomach_level = 10,
+			body_ache_level = 10,
+			chest_pain_level = 4
+			)
+		self.patient_health_conditions.save()
+
+		#IPIMS alert sent
+
+		#load alert sent to portal
+		#Load the patient portal
+		request = self.factory.get(reverse_lazy('Portal'))
+
+		#Set the current user request object
+		request.user = self.patient_user
+
+		#Store the view response
+		response = PatientPortalView(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		#Now load the actual portal view after registration
+		time.sleep(3)
+		response_time = time.time() - response_time_begin
+
+
+		TOTAL_SCHEDULE_APPT_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+
+		print '\033\n[44mTOTAL TIME: %.5f seconds\033[0m'%(TOTAL_SCHEDULE_APPT_TIME)
 
 
