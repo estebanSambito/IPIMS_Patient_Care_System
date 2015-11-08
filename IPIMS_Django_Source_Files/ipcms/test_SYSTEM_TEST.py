@@ -85,6 +85,7 @@ class Test_SystemComplianceTest(TestCase):
 
 
 	def test_PatientFeature(self):
+		TOTAL_PATIENT_FEATURE_TIME = 0
 
 		print '\033[1;45m\n----------------------------------------------------------\n (1) SYSTEM TEST FOR REGISTRATION FEATURE\n-----------------------------------------------------------\033[0m\n'
 
@@ -147,6 +148,8 @@ class Test_SystemComplianceTest(TestCase):
 		#Now load the actual portal view after registration
 		response_time = time.time() - response_time_begin
 
+		TOTAL_PATIENT_FEATURE_TIME += response_time
+
 		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
 		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
 		separator()
@@ -177,6 +180,8 @@ class Test_SystemComplianceTest(TestCase):
 
 		#Now load the actual portal view after registration
 		response_time = time.time() - response_time_begin
+
+		TOTAL_PATIENT_FEATURE_TIME += response_time
 		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
 		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
 		separator()
@@ -212,6 +217,8 @@ class Test_SystemComplianceTest(TestCase):
 
 		#Now load the actual portal view after registration
 		response_time = time.time() - response_time_begin
+
+		TOTAL_PATIENT_FEATURE_TIME += response_time
 		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
 		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
 		separator()
@@ -237,8 +244,11 @@ class Test_SystemComplianceTest(TestCase):
 
 		#Now load the actual portal view after registration
 		response_time = time.time() - response_time_begin
+		TOTAL_PATIENT_FEATURE_TIME += response_time
 		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
 		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		print '\033\n[44mTOTAL TIME: %.5f seconds\033[0m'%(TOTAL_PATIENT_FEATURE_TIME)
 
 	def test_ScheduleApptFeature(self):
 
@@ -248,4 +258,45 @@ class Test_SystemComplianceTest(TestCase):
 
 		#Build the user in the system
 		response_time_begin = time.time()
+
+		self.patient_health_conditions = PatientHealthConditions.objects.create(
+
+			user = self.patient_object,
+			nausea_level = 10,
+			hunger_level = 8,
+			anxiety_level = 1, 
+			stomach_level = 3,
+			body_ache_level = 1,
+			chest_pain_level = 4
+			)
+		self.patient_health_conditions.save()
+
+		#Schedule an appointment
+		medical_appointment_1 = PatientAppt.objects.create(
+			date = "02/20/2016",
+			doctor = self.doctor_obj,
+			pain_level = 10,
+			medical_conditions = "chest pain and stomach issues",
+			allergies = self.fill_patient_application.allergies,
+			user = self.patient_object,
+			current_health_conditions = self.patient_health_conditions
+			)
+		medical_appointment_1.save()
+
+		#Load the patient portal
+		request = self.factory.get(reverse_lazy('SuccessTestView'))
+
+		#Set the current user request object
+		request.user = self.patient_user
+
+		#Store the view response
+		response = SuccessTestView(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		#Now load the actual portal view after registration
+		response_time = time.time() - response_time_begin
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
 
