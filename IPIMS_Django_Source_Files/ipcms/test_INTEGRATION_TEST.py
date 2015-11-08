@@ -73,7 +73,15 @@ class Test_FullIntegrationTest(TestCase):
 		self.patient_object.save()
 		self.patient_permission.save()
 
+		lab_tech_user = User.objects.create(username="lab_tech_user", email="lab_tech_user@yahoo.com", password="lab_tech_user_password")
+		lab_tech_user.save()
 
+		new_tech = LabTech.objects.create(
+
+			lab_first_name="tech1_first_name",
+			lab_last_name="tech1_last_name",
+			lab_user = lab_tech_user
+			)
 
 
 	def test_RegistrationFeatureIntegration(self):
@@ -536,6 +544,77 @@ class Test_FullIntegrationTest(TestCase):
 		Ability for doctor to prescribe medications 
 		Ability for doctor to view patient lab records (Will need to create lab record instantiation)
 		'''
+		self.patient_health_conditions1 = PatientHealthConditions.objects.create(
+
+			user = self.patient_object,
+			nausea_level = 10,
+			hunger_level = 8,
+			anxiety_level = 1, 
+			stomach_level = 3,
+			body_ache_level = 1,
+			chest_pain_level = 4
+			)
+		self.patient_health_conditions1.save()
+
+		medical_appointment_1 = PatientAppt.objects.create(
+			date = "02/20/2016",
+			doctor = self.doctor_obj,
+			pain_level = 10,
+			medical_conditions = "chest pain and stomach issues",
+			allergies = self.fill_patient_application.allergies,
+			user = self.patient_object,
+			current_health_conditions = self.patient_health_conditions1
+			)
+		medical_appointment_1.save()
+
+		doctors_appt = PatientAppt.objects.filter(doctor=self.doctor_obj).get()
+		print'\t-Current appointments scheduled for Dr. %s %s' %(self.doctor_obj.doctor_first_name, self.doctor_obj.doctor_last_name)
+		print '\t-Currently requesting an appointment for patient: %s %s' %(self.fill_patient_application.first_name, self.fill_patient_application.last_name)
+		print '\t-Appointment Details:'
+		print '\t\t+Date: %s'%("02/20/2016")
+		print '\t\t+Doctor: Dr. %s %s'%(self.doctor_obj.doctor_first_name, self.doctor_obj.doctor_last_name)
+		print '\t\t+Pain Level: %d'%(10)
+		print '\t\t+Medical Conditions: xanax'
+		print '\t\t+Allergies: %s'%(doctors_appt.allergies)
+		print '\t\t+Patient: %s %s'%(doctors_appt.user.fill_from_application.first_name, doctors_appt.user.fill_from_application.last_name)
+		print '\t\t+Current Health Conditions: %d %d %d %d %d %d'%(self.patient_health_conditions1.anxiety_level,
+																self.patient_health_conditions1.stomach_level, 
+																self.patient_health_conditions1.body_ache_level, 
+																self.patient_health_conditions1.anxiety_level, 
+																self.patient_health_conditions1.chest_pain_level, 
+																self.patient_health_conditions1.hunger_level 
+																)
+
+		print '\t-Testing service to doctors analysis of health outcomes (should be 0% resolved)'
+
+		print '-\nTESTING THE E-PRESCRIPTION FEATURE\n--'
+
+		current_patient 	= Patient.objects.filter(user__username="pat_user_test").get()
+		current_doctor 		= Doctor.objects.filter(doctor_user__username="doc1").get()
+
+		print '\tCreating a perscription for %s %s' %(current_patient.fill_from_application.first_name, current_patient.fill_from_application.last_name)
+		new_perscription 	= EMedication.objects.create(
+
+			patient = current_patient,
+			medication_name = "Xanax",
+			prescribed_by_doctor = current_doctor
+			
+			)
+
+		new_perscription.save()
+
+		print '\tPerscription is Xanax...'
+
+		self.assertEqual(new_perscription.medication_name, "Xanax")
+
+		print '\tEvaluated as TRUE'
+
+		print '\tThe perscription for the user has been generated successfully!'
+
+
+
+
+		
 
 	def test_ServiceToStaffFeatureIntegration(self):
 
@@ -552,6 +631,66 @@ class Test_FullIntegrationTest(TestCase):
 		View Patient Prescription
 		Update Patient Medical History
 		'''
+
+		#view patient information
+		print '\t-Printing Current Patient Medical Data:\n'
+		print '\t\t+Full Name: %s %s'%(self.fill_patient_application.first_name, self.fill_patient_application.last_name)
+		print '\t\t+SSN: %s'%(self.fill_patient_application.ssn)
+		print '\t\t+Allergies: %s'%(self.fill_patient_application.allergies)
+		print '\t\t+Address: %s'%(self.fill_patient_application.address)
+		print '\t\t+Medications: %s'%(self.fill_patient_application.medications)
+		print '\t\t+Insurance Provider: %s'%(self.fill_patient_application.insurance_provider)
+		print '\t\t+Insurance Policy #: %s'%(self.fill_patient_application.insurance_policy_number)
+		print '\t\t+Email Address: %s'%(self.fill_patient_application.email_address)
+		print '\t\t+Race: %s'%(self.fill_patient_application.race)
+		print '\t\t+Income: %s'%(self.fill_patient_application.income)
+
+		#view all patients
+		print '\t-View all Patients:\n'
+		print '\t\t-Patient First Name: %s' %(self.patient_object.fill_from_application.first_name)
+		print '\t\t-Patient Last Name: %s' %(self.patient_object.fill_from_application.last_name)
+		print '\t\t-Patient Email: %s' %(self.patient_object.fill_from_application.email_address)
+
+		#view patient prescription
+		new_perscription 	= EMedication.objects.create(
+
+			patient = self.patient_object,
+			medication_name = "Tylenol",
+			prescribed_by_doctor = self.doctor_obj
+			
+			)
+
+		new_perscription.save()
+
+		print '\t-View Patient Prescription\n'
+		print'\t\t-Prescription is: %s' %(new_perscription.medication_name)
+
+		#view medical inormation
+		self.patient_user1 = User.objects.create(username="pat1", password="pat1")
+
+		self.fill_patient_application = TempPatientData.objects.create(
+			user = self.patient_user1,
+			first_name = "patient1",
+			last_name = "patient1",
+			ssn = 600418394,
+			allergies = "cats",
+			address = "address 1",
+			medications = "Xanax",
+			insurance_provider = "StateFarm",
+			insurance_policy_number = 19938343434,
+			email_address = "patient1@patient1.com",
+			data_sent = "1",
+			race = "black",
+			income = "$0-$10,000",
+			gender = "female"
+			)
+
+		print '\t-Medical Information'
+		print'\t\t-First Name: %s' %(self.fill_patient_application.first_name)
+		print'\t\t-Last Name: %s' %(self.fill_patient_application.last_name)
+		print'\t\t-Email: %s' %(self.fill_patient_application.email_address)
+		print'\t\t-Medications: %s' %(self.fill_patient_application.medications)
+
 
 	def test_LabRecordsFeatureIntegration(self):
 
