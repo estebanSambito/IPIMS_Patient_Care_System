@@ -130,6 +130,10 @@ Basic success page response rendering for the user
 class SuccessPageView(generic.TemplateView):
 	template_name = 'accounts/success.html'
 
+def SuccessTestView(request):
+	return render(request, 'accounts/success.html')
+
+
 '''''''''''''''''''''''''''''''''''''''''''''''''''
 Sign up view used to register a user into the system
 '''''''''''''''''''''''''''''''''''''''''''''''''''

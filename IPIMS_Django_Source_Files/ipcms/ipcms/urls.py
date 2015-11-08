@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     url(r'^$', HomePageView, name='Home'),
+    url(r'success_test/$', SuccessTestView, name='SuccessTestView'),
     url(r'formsuccess/$', SuccessFormPageView.as_view(), name="DataSubmitted"),
     url(r'success/$', SuccessPageView.as_view(), name='Success'),
     url(r'accounts/apply/$', SignUpView.as_view(), name="Signup"),

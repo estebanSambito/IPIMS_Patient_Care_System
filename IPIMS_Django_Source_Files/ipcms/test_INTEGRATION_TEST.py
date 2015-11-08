@@ -14,6 +14,7 @@ from ipcms.views import PatientPortalView, HealthConditionsView, GenerateStatsVi
 
 class Test_FullIntegrationTest(TestCase):
 
+
 	def setUp(self):
 
 		#Factory used to help with requests
