@@ -61,6 +61,9 @@ urlpatterns = [
     url(r'^accounts/portal/admin/upload_medical_report$', MedicalReportView, name="MedicalReportView"),
     url(r'^accounts/portal/admin/create_medical_report$', CreateMedicalReportView, name="CreateMedicalReportView"),
     url(r'^accounts/portal/admin/EditMedicalHistory$', EditRelevantPatientMedicalHistory, name="EditRelevantPatientMedicalHistory"),
+    # url(r'^accounts/portal/edit_appt_view$', EditAppointmentPatientView, name="EditAppointmentPatientView")
+    url(r'^accounts/portal/view_appts_edit/(?P<pk>\d+)$', EditAppointmentPatientView, name="EditAppointmentPatientView"),
+
 
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

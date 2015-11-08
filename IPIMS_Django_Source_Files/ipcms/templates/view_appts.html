@@ -37,7 +37,16 @@
 				{{appts.medical_conditions|title}}
 				</td>
 				<td>{{appts.date}}</td>
-				<td>Revise</td>
+				<td>
+
+					<form action="{% url 'EditAppointmentPatientView' appts.pk %}" method="POST">
+							{% csrf_token %}
+<!-- 							<input type="hidden" name="appt_id" value="{{appts.pk}}">
+							<input type="hidden" name="patient_id" value="{{current_patient.id}}"> -->
+							<input type="submit" value="Revise" />
+					</form>
+
+				</td>
 				<td>
 					<form action="{% url 'delete' appts.id %}" method="POST">
 							{% csrf_token %}

@@ -371,10 +371,6 @@ def PatientPortalView(request):
 			if len(medications_for_patient) == 0:
 				medications_for_patient = "No Medications Pending"
 
-
-
-
-
 	context = {
 
 		'form': form,
@@ -1290,7 +1286,6 @@ def ViewAllPatientData(request):
 	context = {
 
 		'temp_user_data' : temp_patient_data
-
 	}
 
 	return render(request, 'view_all_patient_data_hsp.html', context)
@@ -1309,7 +1304,6 @@ def RemoveEmergencyAlert(request):
 
 	else:
 		return HttpResponseRedirect(reverse("ViewAlerts"))
-
 
 def ViewCurrentPrescriptions(request):
 
@@ -1392,9 +1386,33 @@ def EditRelevantPatientMedicalHistory(request):
 
 			'form' : form,
 			'current_patient' : current_patient
-
 		}
 
 	return render(request,'edit_patient_history.html', context)
+
+def EditAppointmentPatientView(request, pk):
+
+	
+	appt = PatientAppt.objects.filter(pk=pk)[:1].get()
+	form = PatientApptForm(instance=appt)
+	health_cond = PatientHealthConditions.objects.filter(user=appt.user).get()
+	if request.method =="POST":
+		instance = form.save(commit=False)
+		instance.user = appt.user
+		instance.current_health_conditions = health_cond
+		instance.save()
+
+		form = PatientApptForm(instance=instance)
+		if form.is_valid():
+			form.save()
+		else:
+			print form.errors
+			print 'invalid'
+	
+	context = {
+		'form': form,
+	}
+
+	return render(request, 'schedule.html', context)
 
 

@@ -561,9 +561,9 @@ class Test_SystemComplianceTest(TestCase):
 
 		TOTAL_SERVICE_TO_STAFF_TIME = 0
 
-		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR SERVICE TO STAFF FEATURE\n-----------------------------------------------------------\033[0m\n'
+	print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR SERVICE TO STAFF FEATURE\n-----------------------------------------------------------\033[0m\n'
 
-		separator()
+	separator()
 
 
 	def test_ServiceToLabRecordsFeature(self):
@@ -664,7 +664,7 @@ class Test_SystemComplianceTest(TestCase):
 			user = self.patient_user2
 			)
 
-		self.patient_user2.save()
+		self.patient_user2.save()		
 		self.fill_patient_application2.save()
 		self.patient_object2.save()
 		self.patient_permission.save()
