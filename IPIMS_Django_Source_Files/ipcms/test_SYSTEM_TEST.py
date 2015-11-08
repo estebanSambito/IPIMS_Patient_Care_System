@@ -85,7 +85,20 @@ class Test_SystemComplianceTest(TestCase):
 		self.fill_patient_application.save()
 		self.patient_object.save()
 		self.patient_permission.save()
+		#Build lab member to upload reports for patient
+		self.lab_staff_user = User.objects.create(username="labstaff1", password="labstaff1")
+		self.lab_staff_user_permission = PermissionsRole.objects.create(role = "lab",user = self.lab_staff_user)
 
+		self.lab_staff_user.save()
+		self.lab_staff_user_permission.save()
+
+		self.lab_staff_tech = LabTech.objects.create(
+			lab_first_name = "Lab_Guy",
+			lab_last_name = "Lab_Last_Name",
+			lab_user = self.lab_staff_user
+			)
+
+		self.lab_staff_tech.save()
 
 
 	def test_PatientFeature(self):
@@ -555,6 +568,148 @@ class Test_SystemComplianceTest(TestCase):
 		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR SERVICE TO DOCTORS FEATURE\n-----------------------------------------------------------\033[0m\n'
 
 		separator()
+
+		#Build the user in the system
+		response_time_begin = time.time()
+		self.patient_user3 = User.objects.create(username="pat3", password="pat3")
+
+		#Have the patient fill in their medical information to submit to the HSP staff
+		self.fill_patient_application3 = TempPatientData.objects.create(
+			user = self.patient_user3,
+			first_name = "John",
+			last_name = "Larsen",
+			ssn = 600418394,
+			allergies = "Soda",
+			address = "2417 E. Laurel St. Mesa, AZ 85213",
+			medications = "Xanax",
+			insurance_provider = "StateFarm",
+			insurance_policy_number = 19938343434,
+			email_address = "jacob@jacob.com",
+			data_sent = "1",
+			race = "black",
+			income = "$0-$10,000",
+			gender = "other"
+			)
+
+		#Implement a patient role up to the newly registered (pending) patient
+		self.patient_object3 = Patient.objects.create(
+			fill_from_application = self.fill_patient_application3,
+			user = self.patient_user3,
+			approved = 1
+			)
+
+		#Implement a permission role access to the patient
+		self.patient_permission3 = PermissionsRole.objects.create(
+			role = "patient",
+			user = self.patient_user3
+			)
+
+		self.patient_user3.save()
+		self.fill_patient_application3.save()
+		self.patient_object3.save()
+		self.patient_permission3.save()
+
+
+		#Update the health conditions of the patient
+		self.patient_health_conditions3 = PatientHealthConditions.objects.create(
+
+			user = self.patient_object3,
+			nausea_level = 10,
+			hunger_level = 8,
+			anxiety_level = 1, 
+			stomach_level = 3,
+			body_ache_level = 1,
+			chest_pain_level = 4
+			)
+		self.patient_health_conditions3.save()
+
+		relevant_appt = PatientAppt.objects.create(
+			date = "03/14/2015",
+			doctor= self.doctor_obj,
+			pain_level = 10,
+			medical_conditions="n/a",
+			allergies="cats",
+			user = self.patient_object3,
+			current_health_conditions=self.patient_health_conditions3,
+
+
+			)
+		relevant_appt.save()
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SERVICE_TO_DOCTORS_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+
+		current_appt = PatientAppt.objects.filter(user=self.patient_object3).get()
+		current_appt.pain_level = 0
+		current_appt.save()
+
+		self.assertEqual(0, current_appt.pain_level)
+
+
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SERVICE_TO_DOCTORS_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+		self.patient_permission3.role = "staff"
+		self.patient_permission3.save()
+		request = self.factory.get(reverse_lazy('GenerateStats'))
+		request.user = self.patient_user3
+		response = GenerateStatsView(request)
+
+		self.assertEqual(response.status_code, 200)
+
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SERVICE_TO_DOCTORS_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+
+		e_med_maker = EMedication.objects.create(
+			patient = self.patient_object3,
+			medication_name = "xanax",
+			prescribed_by_doctor=self.doctor_obj
+			)
+
+		e_med_maker.save()
+
+		#Navigate back to the control panel
+		request = self.factory.get(reverse_lazy('Portal'))
+		request.user = self.patient_user3
+		response = PatientPortalView(request)
+
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SERVICE_TO_DOCTORS_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+		new_lab_report = LabReport.objects.create(
+			lab_patient = self.patient_object3,
+			lab_results = "positive",
+			lab_test = "Blood Tests",
+			lab_notes = "seek medical attention",
+			lab_tech = self.lab_staff_tech
+			)
+
+		new_lab_report.save()
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SERVICE_TO_DOCTORS_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+		separator()
+
+		print '\033\n[44mTOTAL TIME: %.5f seconds\033[0m'%(TOTAL_SERVICE_TO_DOCTORS_TIME)
 
 
 	def test_ServiceToStaffFeature(self):
