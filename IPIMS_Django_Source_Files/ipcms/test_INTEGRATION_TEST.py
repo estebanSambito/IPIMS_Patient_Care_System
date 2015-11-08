@@ -888,15 +888,6 @@ class Test_FullIntegrationTest(TestCase):
 		print '\033[1;32m\nUPDATE MEDICAL INFORMATION WAS SUCCESSFUL!\033[0m\n'
 
 
-		'''
-		Test retrieval of patient information
-		View All Patients
-		View Patient Medical Information
-		View Patient Prescription
-		Update Patient Medical History
-		'''
-
-
 		#summary of the integration test that was ran
 		print '\033[30;42m\nSERVICE TO STAFF INTEGRATION TEST SUMMARY:\033[0m'
 		print '\033[30;42m\n-Successful Test of Patient Information Retrieval\033[0m',
