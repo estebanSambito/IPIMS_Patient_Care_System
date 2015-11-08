@@ -75,6 +75,22 @@ class Test_FullIntegrationTest(TestCase):
 		self.patient_permission.save()
 
 
+		#Build HSP member to upload reports for patient
+		self.lab_staff_user = User.objects.create(username="labstaff1", password="labstaff1")
+		self.lab_staff_user_permission = PermissionsRole.objects.create(role = "lab",user = self.lab_staff_user)
+
+		self.lab_staff_user.save()
+		self.lab_staff_user_permission.save()
+
+		self.lab_staff_tech = LabTech.objects.create(
+			lab_first_name = "Lab_Guy",
+			lab_last_name = "Lab_Last_Name",
+			lab_user = self.lab_staff_user
+			)
+
+		self.lab_staff_tech.save()
+
+
 
 
 	def test_RegistrationFeatureIntegration(self):
@@ -558,9 +574,6 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\n\n\n----------------------------------------------------------\nINTEGRATION TEST FOR LAB RECORDS FUNCTIONALITY\n-----------------------------------------------------------'
 
-
-		print 'THIS NEEDS TO BE CODED STILL!'
-
 		'''
 		Test creation of lab record
 		Test viewing of lab record
@@ -568,6 +581,80 @@ class Test_FullIntegrationTest(TestCase):
 		Test removal of lab record
 
 		'''
+		print '\t-Testing creation of lab record'
+		print '\t\t +Assign patient..'
+		print '\t\t +Assign results as positive..'
+		print '\t\t +Assign test as blood test..'
+		print '\t\t +Assign notes as "seek medical attention"..'
+		print '\t\t +Assign tech to %s %s..'%(self.lab_staff_tech.lab_first_name, self.lab_staff_tech.lab_last_name)
+
+		new_lab_report = LabReport.objects.create(
+			lab_patient = self.patient_object,
+			lab_results = "positive",
+			lab_test = "Blood Tests",
+			lab_notes = "seek medical attention",
+			lab_tech = self.lab_staff_tech
+			)
+
+		new_lab_report.save()
+
+		print '\033[1;32m\nLAB REPORT GENERATION IS SUCCESSFUL!\033[0m\n'
+
+		print '\t-Testing viewing of lab record'
+		print '\t\t +Attempting record query for patient..'
+
+		current_lab_record = LabReport.objects.filter(lab_patient = self.patient_object).get()
+
+		print '\t\t +Record obtained successfully, attempting to view details..'
+		print '\t\t +Patient: %s %s'%(current_lab_record.lab_patient.fill_from_application.first_name, current_lab_record.lab_patient.fill_from_application.last_name)
+		print '\t\t +Results: %s'%(current_lab_record.lab_results)
+		print '\t\t +Test Type: %s'%(current_lab_record.lab_test)
+		print '\t\t +Notes: %s'%(current_lab_record.lab_notes)
+		print '\t\t +Tech: %s %s'%(current_lab_record.lab_tech.lab_first_name, current_lab_record.lab_tech.lab_last_name)
+
+
+		print '\033[1;32m\nLAB REPORT VIEWING & RETRIEVAL IS SUCCESSFUL!\033[0m\n'
+
+
+		print '\t-Testing editing of lab record'
+		print '\t\t +Attempting record query for patient..'
+		print '\t\t +Attempting record query for patient..'
+
+		current_lab_record = LabReport.objects.filter(lab_patient = self.patient_object).get()
+
+		print '\t\t +Record obtained successfully, attempting to edit details..'
+
+		self.assertEqual("positive", current_lab_record.lab_results)
+
+		print '\t\t +Current results are %s changing to the opposite'%(current_lab_record.lab_results)
+
+		current_lab_record.lab_results = "negative"
+
+		self.assertEqual("negative", current_lab_record.lab_results)
+
+		print '\033[1;32m\nLAB REPORT EDIT SUCCESSFUL!\033[0m\n'
+
+		print '\t-Testing removal of lab record'
+
+		if (LabReport.objects.filter(lab_patient = self.patient_object).exists()):
+			print '\t\t +The lab record currently exists... removing'
+
+		else:
+			print '\t\t +Lab record no longer exists'
+
+		lab_removal = LabReport.objects.filter(lab_patient = self.patient_object).get()
+		lab_removal.delete()
+
+		if (LabReport.objects.filter(lab_patient = self.patient_object).exists()):
+			print '\t\t +The lab record currently exists... removing'
+
+		else:
+			print '\t\t +Lab record no longer exists'
+
+		print '\033[1;32m\nLAB REPORT REMOVAL SUCCESSFUL!\033[0m\n'
+
+
+		#Create the lab staff 
 
 	def test_StatsReportsFeatureIntegration(self):
 
