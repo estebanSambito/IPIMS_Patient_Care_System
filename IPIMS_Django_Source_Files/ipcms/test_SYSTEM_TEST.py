@@ -589,6 +589,10 @@ class Test_SystemComplianceTest(TestCase):
 
 		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR SERVICE TO LAB FEATURE\n-----------------------------------------------------------\033[0m\n'
 		
+		separator()
+
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Creation of Lab Record")
+
 		response_time_begin = time.time()
 
 		new_lab_report = LabReport.objects.create(
@@ -600,8 +604,6 @@ class Test_SystemComplianceTest(TestCase):
 			)
 
 		new_lab_report.save()
-
-		separator()
 		
 		response_time = time.time() - response_time_begin
 
@@ -610,6 +612,8 @@ class Test_SystemComplianceTest(TestCase):
 		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
 
 		separator()
+
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Viewing of Lab Record")
 
 		current_lab_record = LabReport.objects.filter(lab_patient = self.patient_object).get()
 
@@ -629,6 +633,8 @@ class Test_SystemComplianceTest(TestCase):
 
 		self.assertEqual("negative", current_lab_record.lab_results)
 
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Editing of Lab Record")
+
 		response_time = time.time() - response_time_begin
 
 		TOTAL_SERVICE_TO_LAB_TIME += response_time
@@ -639,6 +645,8 @@ class Test_SystemComplianceTest(TestCase):
 
 		lab_removal = LabReport.objects.filter(lab_patient = self.patient_object).get()
 		lab_removal.delete()
+
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Removal of Lab Record")
 
 		response_time = time.time() - response_time_begin
 
