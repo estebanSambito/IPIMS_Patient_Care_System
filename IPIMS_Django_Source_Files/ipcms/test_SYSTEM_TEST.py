@@ -81,10 +81,27 @@ class Test_SystemComplianceTest(TestCase):
 			user = self.patient_user
 			)
 
+
+
 		self.patient_user.save()
 		self.fill_patient_application.save()
 		self.patient_object.save()
 		self.patient_permission.save()
+
+	#Build lab member to upload reports for patient
+		self.lab_staff_user = User.objects.create(username="labstaff1", password="labstaff1")
+		self.lab_staff_user_permission = PermissionsRole.objects.create(role = "lab",user = self.lab_staff_user)
+
+		self.lab_staff_user.save()
+		self.lab_staff_user_permission.save()
+
+		self.lab_staff_tech = LabTech.objects.create(
+			lab_first_name = "Lab_Guy",
+			lab_last_name = "Lab_Last_Name",
+			lab_user = self.lab_staff_user
+			)
+
+		self.lab_staff_tech.save()
 
 
 
@@ -571,8 +588,67 @@ class Test_SystemComplianceTest(TestCase):
 		TOTAL_SERVICE_TO_LAB_TIME = 0
 
 		print '\033[1;45m\n----------------------------------------------------------\nSYSTEM TEST FOR SERVICE TO LAB FEATURE\n-----------------------------------------------------------\033[0m\n'
+		
+		response_time_begin = time.time()
+
+		new_lab_report = LabReport.objects.create(
+			lab_patient = self.patient_object,
+			lab_results = "positive",
+			lab_test = "Blood Tests",
+			lab_notes = "seek medical attention",
+			lab_tech = self.lab_staff_tech
+			)
+
+		new_lab_report.save()
 
 		separator()
+		
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SERVICE_TO_LAB_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+
+		current_lab_record = LabReport.objects.filter(lab_patient = self.patient_object).get()
+
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SERVICE_TO_LAB_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+
+		current_lab_record = LabReport.objects.filter(lab_patient = self.patient_object).get()
+
+		self.assertEqual("positive", current_lab_record.lab_results)
+
+		current_lab_record.lab_results = "negative"
+
+		self.assertEqual("negative", current_lab_record.lab_results)
+
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SERVICE_TO_LAB_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+
+		lab_removal = LabReport.objects.filter(lab_patient = self.patient_object).get()
+		lab_removal.delete()
+
+		response_time = time.time() - response_time_begin
+
+		TOTAL_SERVICE_TO_LAB_TIME += response_time
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+
+		print '\033\n[44mTOTAL TIME: %.5f seconds\033[0m'%(TOTAL_SERVICE_TO_LAB_TIME)
 
 	def test_GenerationHealthStatsFeature(self):
 
