@@ -16,6 +16,10 @@ def calculateResponseEfficiency(output_time):
 		return '\033[1;32mVERY GOOD\033[0m'
 	elif (output_time < .01):
 		return '\033[1;32mGOOD\033[0m'
+	elif (output_time < .15):
+		return '\033[1;37mDECENT\033[0m'
+	else:
+		return '\033[1;31mNEEDS TO BE QUICKER\033[0m'
 
 def separator():
 	print '\t\t---------------------------------------------------------'
@@ -252,9 +256,11 @@ class Test_SystemComplianceTest(TestCase):
 
 	def test_ScheduleApptFeature(self):
 
+		TOTAL_PATIENT_FEATURE_TIME = 0
+
 		print '\033[1;45m\n----------------------------------------------------------\n (2) SYSTEM TEST FOR SCHEDULE FEATURE\n-----------------------------------------------------------\033[0m\n'
 
-		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Schedule Appt. Request")
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Schedule Appointment")
 
 		#Build the user in the system
 		response_time_begin = time.time()
@@ -299,4 +305,73 @@ class Test_SystemComplianceTest(TestCase):
 		response_time = time.time() - response_time_begin
 		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
 		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+		separator()
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("View Appointment")
+
+		#Build the user in the system
+		response_time_begin = time.time()
+
+		#Query the appointment for viewing
+		find_appt = PatientAppt.objects.filter(user=self.patient_object).get()
+
+		#Load the patient portal
+		request = self.factory.get(reverse_lazy('SuccessTestView'))
+
+		#Set the current user request object
+		request.user = self.patient_user
+
+		#Store the view response
+		response = SuccessTestView(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		#Now load the actual portal view after registration
+		response_time = time.time() - response_time_begin
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+		separator()
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Manage Appointment")
+
+		#Build the user in the system
+		response_time_begin = time.time()
+
+		#Query the appointment for viewing
+		find_appt = PatientAppt.objects.filter(user=self.patient_object).get()
+
+		find_appt.nausea_level = 1
+		find_appt.stomach_level = 5
+		find_appt.chest_pain_level = 7
+		find_appt.anxiety_level = 3
+		find_appt.body_ache_level = 1
+		find_appt.save()
+
+		#Appt updated
+
+		#Load the patient portal
+		request = self.factory.get(reverse_lazy('SuccessTestView'))
+
+		#Set the current user request object
+		request.user = self.patient_user
+
+		#Store the view response
+		response = SuccessTestView(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		#Now load the actual portal view after registration
+		response_time = time.time() - response_time_begin
+		print '\t\t- \033[1;33mResponse Time:\033[0m %.3f seconds'%(response_time)
+		print '\t\t- \033[1;33mReliability Rating:\033[0m %s'%(calculateResponseEfficiency(response_time))
+
+	def test_ScheduleApptFeature(self):
+
+		print '\033[1;45m\n----------------------------------------------------------\n (3) UPDATE HEALTH CONDITIONS FEATURE\n-----------------------------------------------------------\033[0m\n'
+
+		print '\t\t- \033[1;33mFeature Name:\033[0m %s'%("Create Health Conditions")
+
+
+
 
