@@ -8,12 +8,11 @@ from django.shortcuts import redirect, get_object_or_404
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.models import AnonymousUser, User
 import time
-from ipcms.views import PatientPortalView, HealthConditionsView, GenerateStatsView
+from ipcms.views import PatientPortalView, HealthConditionsView, GenerateStatsView, ViewAllPatientData
 
 
 
 class Test_FullIntegrationTest(TestCase):
-
 
 	def setUp(self):
 
@@ -75,7 +74,7 @@ class Test_FullIntegrationTest(TestCase):
 		self.patient_permission.save()
 
 
-		#Build HSP member to upload reports for patient
+		#Build lab member to upload reports for patient
 		self.lab_staff_user = User.objects.create(username="labstaff1", password="labstaff1")
 		self.lab_staff_user_permission = PermissionsRole.objects.create(role = "lab",user = self.lab_staff_user)
 
@@ -558,8 +557,153 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\n\n\n----------------------------------------------------------\nINTEGRATION TEST FOR SERVICE TO STAFF FUNCTIONALITY\n-----------------------------------------------------------'
 
+		'''
+		Test retrieval of patient information
+		View All Patients
+		View Patient Medical Information
+		View Patient Prescription
+		Update Patient Medical History
+		'''
 
-		print 'THIS NEEDS TO BE CODED STILL!'
+		print '\t-Testing valid retrieval of patient information from the database..'
+
+		current_patient = Patient.objects.filter(user=self.patient_user).get()
+
+		print '\t-Individual Patient Information has been retrieved successfully..'
+		print '\t\t +%s %s'%(current_patient.fill_from_application.first_name, current_patient.fill_from_application.last_name)
+
+		#temp staff change to test valid page viewing for all patient data
+		self.lab_staff_user_permission = "staff"
+
+		request = self.factory.get(reverse_lazy('ViewAllPatientData'))
+		request.user = self.lab_staff_user
+		response = ViewAllPatientData(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		self.assertContains(response, current_patient.fill_from_application.first_name)
+
+
+		print '\033[1;32m\nVIEWING PATIENT DATA INFO RETRIEVAL SUCCESSFUL!\033[0m\n'
+
+		#Testing valid ability to load all the users in the datbase
+
+		self.patient_user2 = User.objects.create(username="pat_user_test2", password="pat_pass_test2")
+
+		#Have the patient fill in their medical information to submit to the HSP staff
+		self.fill_patient_application2 = TempPatientData.objects.create(
+			user = self.patient_user2,
+			first_name = "Ryan",
+			last_name = "Schachte",
+			ssn = 600418394,
+			allergies = "Soda",
+			address = "2417 E. Laurel St. Mesa, AZ 85213",
+			medications = "Xanax",
+			insurance_provider = "StateFarm",
+			insurance_policy_number = 19938343434,
+			email_address = "jacob1@jacob.com",
+			data_sent = "1",
+			race = "black",
+			income = "$0-$10,000",
+			gender = "other"
+			)
+
+		#Implement a patient role up to the newly registered (pending) patient
+		self.patient_object2 = Patient.objects.create(
+			fill_from_application = self.fill_patient_application2,
+			user = self.patient_user2,
+			approved = 1
+			)
+
+		#Implement a permission role access to the patient
+		self.patient_permission = PermissionsRole.objects.create(
+			role = "patient",
+			user = self.patient_user2
+			)
+
+		self.patient_user2.save()
+		self.fill_patient_application2.save()
+		self.patient_object2.save()
+		self.patient_permission.save()
+
+
+		# ViewAllPatientData
+		print '\t-Attempting retrieval of all patients in the database..'
+		print '\t-Current total count of all patient users in the database is %d' %(Patient.objects.all().count())
+		print '\t-Need to HTTP request that the following names appear on the view all data page:'
+
+		patient_1 = Patient.objects.all()[:1].get()
+		patient_2 = Patient.objects.all()[1:2].get()
+
+		print '\t\t +%s %s'%(patient_1.fill_from_application.first_name, patient_1.fill_from_application.last_name)
+		print '\t\t +%s %s'%(patient_2.fill_from_application.first_name, patient_2.fill_from_application.last_name)
+		print '\t-Loading all patient data page..'
+
+		request = self.factory.get(reverse_lazy('ViewAllPatientData'))
+		request.user = self.lab_staff_user
+		response = ViewAllPatientData(request)
+
+		#Test valid response code
+		self.assertEqual(response.status_code, 200)
+
+		print '\t-Patient data page loaded successfully..'
+
+		self.assertContains(response, patient_1.fill_from_application.first_name)
+		self.assertContains(response, patient_1.fill_from_application.last_name)
+		self.assertContains(response, patient_2.fill_from_application.first_name)
+		self.assertContains(response, patient_2.fill_from_application.last_name)
+
+		print '\t-All patient records populated successfully!'
+
+		print '\033[1;32m\nVIEWING ALL PATIENTS IS SUCCESSFUL!\033[0m\n'
+
+		print '\t-Testing ability to view patient medical information'
+
+		print '\t-Attempting to query patient from DB..'
+
+		patient_query_test = Patient.objects.filter(user=self.patient_user).get()
+
+		print '\t-Patient retrieval: SUCCESS'
+		print '\t-Attempting to view name data to validate query'
+		print '\t-The patient name is %s %s'%(patient_query_test.fill_from_application.first_name, patient_query_test.fill_from_application.last_name)
+
+		print '\033[1;32m\nVIEWING PATIENT DATA IS SUCCESSFUL!\033[0m\n'
+
+		print '\t-Testing ability to view patient e-medication data properly'
+
+		emed = EMedication.objects.create(
+
+			patient = patient_query_test,
+			medication_name = "xanax",
+			prescribed_by_doctor = self.doctor_obj
+			)
+
+		emed.save()
+
+		print '\t-Query for e-medication..'
+
+		current_emed = EMedication.objects.filter(patient = patient_query_test).get()
+
+		print '\t-EMedication obtained..'
+
+		print '\t-Medication Name: %s'%(current_emed.medication_name)
+
+		print '\033[1;32m\nMEDICATION DATA RETRIEVED SUCCESSFULLY!\033[0m\n'
+
+		print '\t-Attempting to update medical history for the following patient:'
+		print '\t\t-%s'%(patient_query_test)
+
+
+		med_adder = AddMedicalHistory.objects.create(
+			allergies = "kittens",
+			medical_conditions = "none",
+			patient = patient_query_test
+			)
+
+		med_adder.save()
+
+		print '\033[1;32m\nUPDATE MEDICAL INFORMATION WAS SUCCESSFUL!\033[0m\n'
 
 
 		'''
@@ -569,6 +713,16 @@ class Test_FullIntegrationTest(TestCase):
 		View Patient Prescription
 		Update Patient Medical History
 		'''
+
+
+		#summary of the integration test that was ran
+		print '\033[30;42m\nSERVICE TO STAFF INTEGRATION TEST SUMMARY:\033[0m'
+		print '\033[30;42m\n-Successful Test of Patient Information Retrieval\033[0m',
+		print '\033[30;42m\n-Successful Viewing of Patients in Database\033[0m',
+		print '\033[30;42m\n-Successful Retrieval of Patient Medical Information\033[0m',
+		print '\033[30;42m\n-Successful Retrieval of Perscription Information\033[0m',
+		print '\033[30;42m\n-Successful Update for Medical History\033[0m'
+
 
 	def test_LabRecordsFeatureIntegration(self):
 
@@ -653,8 +807,12 @@ class Test_FullIntegrationTest(TestCase):
 
 		print '\033[1;32m\nLAB REPORT REMOVAL SUCCESSFUL!\033[0m\n'
 
-
-		#Create the lab staff 
+		#summary of integration test
+		print '\033[30;42mLAB FEATURE INTEGRATION TEST SUMMARY:\033[0m'
+		print '\033[30;42m\n-Successful Lab Report Creation\033[0m',
+		print '\033[30;42m\n-Successful Viewing & Retrieval of Lab Report\033[0m',
+		print '\033[30;42m\n-Successful Editing of Lab Report\033[0m',
+		print '\033[30;42m\n-Successful Removal of Lab Report\033[0m'
 
 	def test_StatsReportsFeatureIntegration(self):
 
@@ -811,7 +969,6 @@ class Test_FullIntegrationTest(TestCase):
 		#Create another patient who isn't approved
 		#Yielf a 50/50 admission rate for approved and unapproved
 
-
 		self.patient_user2 = User.objects.create(username="pat2", password="pat2")
 
 		#Have the patient fill in their medical information to submit to the HSP staff
@@ -896,4 +1053,11 @@ class Test_FullIntegrationTest(TestCase):
 		self.assertContains(response, '<li>33.33% Other</li>')
 
 		print '\033[1;32m\nSTATISTICAL REPORTS GENDER TYPES OUTPUTTED SUCCESSFULLY!\033[0m\n'
+
+		#summary of integration test
+		print '\033[30;42mSTATISTICAL ANALYSIS FEATURE INTEGRATION TEST SUMMARY:\033[0m'
+		print '\033[30;42m\n-Successful Health Outcome Analysis\033[0m',
+		print '\033[30;42m\n-Successful Admission Rate Analysis\033[0m',
+		print '\033[30;42m\n-Successful Patient Type Analysis\033[0m',
+		print '\033[30;42m\n-Successful Patient Population Analysis\033[0m'
 

@@ -682,7 +682,6 @@ class Test_SystemComplianceTest(TestCase):
 		self.assertEqual(response.status_code, 200)
 
 
-
 		response_time = time.time() - response_time_begin
 
 		TOTAL_STATS_FEATURE += response_time
