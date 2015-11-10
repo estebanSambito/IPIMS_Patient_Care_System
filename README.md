@@ -1,6 +1,6 @@
 <html>
 <head>
-# CSE360_Project
+# Django & Python Interactive Health System
 </head>
 
 <body>
