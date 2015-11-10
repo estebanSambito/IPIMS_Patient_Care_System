@@ -6,9 +6,7 @@ env:
   - DJANGO=1.7
   - DJANGO=1.8
 install:
-  - pip install -q Django==$DJANGO --use-mirrors
-  - pip install pep8 --use-mirrors
-  - pip install https://github.com/Schachte/IPIMS_Patient_Care_System/tarball/develop
-  - pip install -q -e . --use-mirrors
+  - pip install --upgrade setuptools 
+  - pip install -r requirements.txt
 script:
   - python manage.py test
