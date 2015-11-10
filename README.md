@@ -4,6 +4,8 @@
 </head>
 
 <body>
+<img src="https://travis-ci.org/Schachte/IPIMS_Patient_Care_System.svg?branch=develop"><br>
+
 This is a collaborative project for CSE360. Our basic goal is to create a "health management system" that fulfills<br />
 the needs of a basic private clinic. The various features can be found below
 
