@@ -1253,7 +1253,6 @@ def edit_lab_results(request):
 
 		return render(request,'all_lab_results.html', context)
 
-
 def CreateLabReportView(request):
 
 	title = "Lab Report Creation Form"
@@ -1370,11 +1369,11 @@ def CreateMedicalReportView(request):
 def EditRelevantPatientMedicalHistory(request):
 
 
-	if request.method == "POST":
+	if request.method == "POST" and not "send_form" in request.POST:
 
 		patient_pk = request.POST.get("pk_patient2", "")
 
-		instance = Patient.objects.filter(pk=patient_pk).get()
+		instance = Patient.objects.filter(id=patient_pk).get()
 
 		current_patient = instance
 
@@ -1388,11 +1387,25 @@ def EditRelevantPatientMedicalHistory(request):
 			'current_patient' : current_patient
 		}
 
-	return render(request,'edit_patient_history.html', context)
+		return render(request,'edit_patient_history.html', context)
+
+	elif request.method == "POST" and "send_form" in request.POST:
+
+		patient_id_key = request.POST.get('pk_patient2', '')
+		# TempPatientData.objects.filter(id = 'pk_patient2').get()
+		patient_id_key = int(patient_id_key)
+
+		instance = get_object_or_404(TempPatientData, id=patient_id_key)
+
+		form = TempPatientDataForm(request.POST or None, instance=instance)
+		if form.is_valid():
+			form.save()
+
+		return HttpResponseRedirect('formsuccess')
+
 
 def EditAppointmentPatientView(request, pk):
 
-	
 	appt = PatientAppt.objects.filter(pk=pk)[:1].get()
 	form = PatientApptForm(instance=appt)
 	health_cond = PatientHealthConditions.objects.filter(user=appt.user).get()
@@ -1415,4 +1428,102 @@ def EditAppointmentPatientView(request, pk):
 
 	return render(request, 'schedule.html', context)
 
+#Allow the patient to select their associated appointment and then push the data to the datbase
+def PatientReviseAppointmentView(request):
+	#Need to get the currently logged in patient
+	#Need to get the primary key for the currently selected appointment in the system
+	#Need to get all of the doctors to loop them through the combo box of the form
 
+	if request.method == "POST" and 'current_patient_pk' in request.POST:
+
+		#Query the patient from the database
+		patient_search_key = request.POST.get('current_patient_pk', '')
+		patient_appt_key = request.POST.get('current_appt_pk', '')
+
+		if Patient.objects.filter(pk=patient_search_key).exists():
+
+			#The object exists within the database, we need to store it
+			current_patient = Patient.objects.filter(pk=patient_search_key).get()
+			current_appt = PatientAppt.objects.filter(pk=patient_appt_key).get()
+
+			#We need to query all of the doctors that lie within the system
+			all_doctors = Doctor.objects.all()
+
+			#Returning the current patient that is logged in
+			#Returning the current appointment relevant to the patient that clicked on
+			#Returning all the doctors that lie within the system to populate the combo fields
+
+			#Get all of the appointment data and store into variables so you can reference it more easily in the template
+
+			appt_date 				= current_appt.date
+			appt_doctor 			= current_appt.doctor
+			appt_pain_level 		= current_appt.pain_level
+			appt_medical_conditions = current_appt.medical_conditions
+			appt_allergies 			= current_appt.allergies
+			appt_user 				= current_appt.user
+			appt_current_health_con = current_appt.current_health_conditions
+			appt_resolved 			= current_appt.resolved
+
+
+			context = {
+
+				'current_patient' : current_patient,
+				'current_appt' : current_appt,
+				'all_doctors' : all_doctors,
+				'appt_date' : appt_date,
+				'appt_doctor' : appt_doctor, 
+				'appt_pain_level' : appt_pain_level, 
+				'appt_medical_conditions' : appt_medical_conditions, 
+				'appt_allergies' : appt_allergies, 
+				'appt_user' : appt_user, 
+				'appt_current_health_con' : appt_current_health_con, 
+				'appt_resolved' : appt_resolved, 
+				'patient_search_key' : patient_search_key,
+				'patient_appt_key' : patient_appt_key,
+			}
+
+			#Return the context data to the template of the page to utilize in the template
+			return render(request, 'appoint_revision_final.html', context)
+
+		else:
+			#If the request is not a POST method then return the template with no data inside of ti
+			return render(request, 'appointment_revision_final.html')
+
+
+#Add the ability to save the requested appointment changes from the portal of the appointment changer view
+def SaveApptEditView(request):
+
+	if request.method == "POST":
+
+		#Query the patient from the database
+		patient_search_key 		= request.POST.get('current_patient_pk', '')
+		patient_appt_key 		= request.POST.get('current_appt_pk', '')
+		patient_doctor_key 		= request.POST.get('chosen_doctor', '')
+
+		new_appt_date 			= request.POST.get('appt_date', '')
+		new_pain_level 			= request.POST.get('appt_pain_level', '')
+		new_medical_conditions  = request.POST.get('appt_medical_conditions', '')
+		new_allergies 			= request.POST.get('appt_allergies', '')
+
+		#Convert into proper data type
+		patient_search_key 		= int(patient_search_key)
+		patient_appt_key 		= int(patient_appt_key)
+		patient_doctor_key 		= int(patient_doctor_key)
+
+		#push the post vars to the view to log the current patient data into teh system
+		current_appt 			= PatientAppt.objects.filter(id=patient_appt_key).get()
+		patient_doctor 			= Doctor.objects.filter(id=patient_doctor_key).get()
+
+		#Begin updating the relevant fields for the appointment
+		current_appt.date 				= new_appt_date
+		current_appt.doctor 			= patient_doctor
+		current_appt.pain_level 		= new_pain_level
+		current_appt.medical_conditions = new_medical_conditions
+		current_appt.allergies 			= new_allergies
+
+
+		#Save the appointment updates to store into the database
+		current_appt.save()
+
+		#Return the patient to a success page
+		return HttpResponseRedirect('formsuccess')

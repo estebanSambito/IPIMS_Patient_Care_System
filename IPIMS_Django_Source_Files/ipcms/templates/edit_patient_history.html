@@ -20,9 +20,11 @@
 {% if user.is_authenticated %}
 
 
-		<form method ='POST' action=''>
+		<form method ='POST' action='/accounts/portal/admin/EditMedicalHistory'>
 			{% csrf_token %}
 			{{ form|crispy }}
+			<input type="hidden" value="" name="send_form"></input>
+			<input type="hidden" value={{current_patient.fill_from_application.id}} name="pk_patient2"></input>
 			<input type="submit" value="Update Patient Medical History Data" class="btn default"/>
 		</form>
 

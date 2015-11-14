@@ -424,3 +424,17 @@ a {
     color :black;
 }
 
+#pull_left {
+
+    float: left;
+    display: inline;
+    font-size: 10px;
+    font-weight: bold;
+    vertical-align: middle;
+    margin-top: 10px;
+}
+
+#pull_right {
+
+    width: 90%;
+}
