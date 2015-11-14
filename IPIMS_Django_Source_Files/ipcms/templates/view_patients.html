@@ -29,10 +29,10 @@
 			    <h3>{{patient.user.fill_from_application.first_name|title}} {{patient.user.fill_from_application.last_name|title}}</h3>
 
 			    <hr>
-			       <form action = "/accounts/portal/update_account/" method="POST">
+			       <form action = "/accounts/portal/admin/EditMedicalHistory" method="POST">
 			       	{% csrf_token %}
-			       	<input type="hidden" name="pk" value="{{patient.id}}">
-			       	<button type="submit" onclick="return confirm('Confirm Page Leave?')">Edit Patient Info</button>
+			       	<input type="hidden" value={{patient.user.fill_from_application.id}} name="pk_patient2"></input>
+			       	<button type="submit">Edit Patient Info</button>
 			       </form>
 			    <hr>			       
 		         <form method ="POST" action='/accounts/portal/medical_history'>
