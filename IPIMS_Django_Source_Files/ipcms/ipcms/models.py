@@ -113,6 +113,7 @@ class Alert(models.Model):
 class EMedication(models.Model):
 	patient = models.ForeignKey(Patient, null=False, default='', blank=False)
 	medication_name = models.CharField(max_length=255, default = '', blank=False, null=False)
+	medication_quantity = models.IntegerField(default=0, blank=True, null=True)
 	reminder = models.IntegerField(default=0)
 	prescribed_by_doctor = models.ForeignKey(Doctor, default="0")
 

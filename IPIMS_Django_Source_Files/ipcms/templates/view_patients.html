@@ -41,10 +41,10 @@
 		         	<input type="hidden" name="pk_patient2" value="{{patient.user.id}}">
 		         </form>
 			    <hr>
-			       <form action = "/accounts/portal/update_account/" method="POST">
+			       <form action = "/accounts/portal/admin/view_lab_results" method="POST">
 			       	{% csrf_token %}
-			       	<input type="hidden" name="pk" value="{{patient.id}}">
-			       	<button type="submit" onclick="return confirm('Confirm Page Leave?')">View Patient Lab Records</button>
+			       	<input type="hidden" value="{{patient.user.pk}}" name="patient_labs"></input>
+			       	<button type="submit">View Patient Lab Records</button>
 			       </form>
 			    <hr>
 			       <form action = "/delete/" method="POST">

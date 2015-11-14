@@ -1157,14 +1157,15 @@ def clear_perscription_notification(request):
 def get_lab_results(request):
 
 	#This view is going to be responsible for getting all the lab results and description for each patient
-
 	if request.method == "POST" and 'patient_labs' in request.POST:
+
 		#We need to get all the lab results based on the patient PRIMARY KEY
-
 		patient_labs = request.POST.get("patient_labs", "")
+		patient_labs = int(patient_labs)
 
-		patient_lab_results = LabReport.objects.filter(lab_patient__pk=patient_labs).all()
-		current_patient = Patient.objects.filter(pk=patient_labs).get()
+		patient_lab_results = LabReport.objects.filter(lab_patient__id=patient_labs).all()
+
+		current_patient = Patient.objects.filter(id=patient_labs).get()
 
 		context = {
 
@@ -1229,13 +1230,32 @@ def edit_lab_results(request):
 
 		primary_key_val = model_instance
 
+		patient_object = model_instance.lab_patient
+
 		form = LabReportForm(instance=model_instance)
 
 		context = {
-			'form' : form
+			'form' : form,
+			'patient_object' : patient_object,
 		}
 
 		return render(request,'edit_lab_report.html', context)
+
+
+	elif request.method == "POST" and "send_form" in request.POST:
+
+		patient_id_key = request.POST.get('pk_patient2', '')
+		# TempPatientData.objects.filter(id = 'pk_patient2').get()
+		patient_id_key = int(patient_id_key)
+
+		instance = get_object_or_404(LabReport, id=patient_id_key)
+
+		form = LabReportForm(request.POST or None, instance=instance)
+		if form.is_valid():
+			form.save()
+
+		return HttpResponseRedirect('formsuccess')
+
 
 	elif request.method == "POST":
 

@@ -156,7 +156,6 @@
        <b><a href="/accounts/portal/update_account/">Update Your IPIMS Contact Card</a></b>
 </div>
 
-
         </div>
         <div class="col-sm-4">
           <br>
@@ -203,7 +202,7 @@
 
               <form method="POST" action="/accounts/portal/clear/">
                 {% csrf_token %}
-                <b><li>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{{medications.medication_name}}&emsp;&emsp;&emsp;&emsp;<button type="submit" name="pres" value="{{medications.pk}}">Clear Notification</button></li><b>
+                <b><li>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;{{medications.medication_name|title}} Quantity: {{medications.medication_quantity}}&emsp;&emsp;&emsp;&emsp;<button type="submit" name="pres" value="{{medications.pk}}">Clear Notification</button></li><b>
               </form>
 
               {% endfor %}
