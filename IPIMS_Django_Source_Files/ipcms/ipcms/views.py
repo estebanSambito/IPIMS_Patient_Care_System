@@ -831,21 +831,26 @@ def PatientDataView(request):
 
 	if roles.role == 'doctor':
 		current_doctor = Doctor.objects.filter(doctor_user=request.user)
-		patients = PatientAppt.objects.filter(doctor=current_doctor).all()
-		if PatientAppt.objects.filter(doctor=current_doctor).count() == 0:
+
+		if PatientAppt.objects.filter(doctor=current_doctor).exists():
+
+			patients = PatientAppt.objects.filter(doctor=current_doctor).all()
+			if PatientAppt.objects.filter(doctor=current_doctor).count() == 0:
+				patients = 0
+
+			final_patient_list = []
+			final_patient_users = []
+
+			for patient in patients:
+				if patient.user.user not in final_patient_users:
+					final_patient_users.append(patient.user.user)
+					final_patient_list.append(patient)
+
+			patients = final_patient_list
+
+		else:
 			patients = 0
 
-
-
-		final_patient_list = []
-		final_patient_users = []
-
-		for patient in patients:
-			if patient.user.user not in final_patient_users:
-				final_patient_users.append(patient.user.user)
-				final_patient_list.append(patient)
-
-		patients = final_patient_list
 
 
 	context = {

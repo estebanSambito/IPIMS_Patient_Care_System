@@ -15,6 +15,14 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name='AddMedicalHistory',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('allergies', models.CharField(default=b'', max_length=255)),
+                ('medical_conditions', models.CharField(default=b'', max_length=255)),
+            ],
+        ),
+        migrations.CreateModel(
             name='Alert',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
@@ -37,6 +45,26 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('medication_name', models.CharField(default=b'', max_length=255)),
+                ('medication_quantity', models.IntegerField(default=0, null=True, blank=True)),
+                ('reminder', models.IntegerField(default=0)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='LabReport',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('lab_results', models.CharField(max_length=255, choices=[(b'positive', b'Positive'), (b'negative', b'Negative')])),
+                ('lab_test', models.CharField(max_length=255, choices=[(b'Blood pressure screening', b'Blood pressure screening'), (b'C-reactive protein test', b'C-reactive protein test'), (b'Colonoscopy', b'Colonoscopy'), (b'Diabetes risk tests', b'Diabetes risk tests'), (b'Pap smear', b'Pap smear'), (b'Skin cancer exam', b'Skin cancer exam'), (b'Blood Tests', b'Blood Tests')])),
+                ('lab_notes', models.TextField(default=b'Insert Notes For Lab Test')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='LabTech',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('lab_first_name', models.CharField(default=b'', max_length=256)),
+                ('lab_last_name', models.CharField(default=b'', max_length=256)),
+                ('lab_user', models.OneToOneField(default=b'', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -45,6 +73,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('approved', models.IntegerField(default=0)),
                 ('alertSent', models.IntegerField(default=0)),
+                ('date_created', models.CharField(default=b'9-20-1995', max_length=20, null=True)),
             ],
         ),
         migrations.CreateModel(
@@ -91,15 +120,14 @@ class Migration(migrations.Migration):
                 ('race', models.CharField(default=b'Other', max_length=256, choices=[(b'white', b'White'), (b'american_indian_alaskan_native', b'American Indian or Alaskan Native'), (b'hawaiian', b'Native Hawaiian or Other Pacific Islander'), (b'black', b'Black or African American'), (b'asian', b'Asian'), (b'other', b'Other')])),
                 ('income', models.CharField(default=b'Prefer Not To Say', max_length=256, choices=[(b'$0-$10,000', b'$0-$10,000'), (b'$10,001-$30,000', b'$10,001-$30,000'), (b'$30,001-$60,000', b'$30,001-$60,000'), (b'$60,001-$85,000', b'$60,001-$85,000'), (b'$85,001-$110,000', b'$85,001-$110,000'), (b'$110,001+', b'$110,001+'), (b'Prefer Not To Say', b'Prefer Not To Say')])),
                 ('phone_number', phonenumber_field.modelfields.PhoneNumberField(default=b'', max_length=128, blank=True)),
-                ('DOB', models.DateField(default=b'')),
-                ('ssn', models.IntegerField()),
+                ('DOB', models.CharField(max_length=255, null=True, blank=True)),
+                ('ssn', models.IntegerField(blank=True)),
                 ('allergies', models.CharField(default=b'', max_length=256)),
                 ('address', models.CharField(default=b'', max_length=256)),
                 ('medications', models.CharField(default=b'', max_length=256)),
                 ('insurance_provider', models.CharField(max_length=256)),
-                ('insurance_policy_number', models.IntegerField()),
+                ('insurance_policy_number', models.IntegerField(blank=True)),
                 ('data_sent', models.IntegerField(default=0)),
-                ('date_created', models.CharField(default=b'9-20-1995', max_length=20, null=True)),
                 ('user', models.OneToOneField(null=True, default=b'', to=settings.AUTH_USER_MODEL)),
             ],
         ),
@@ -129,13 +157,33 @@ class Migration(migrations.Migration):
             field=models.OneToOneField(null=True, default=b'', blank=True, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
+            model_name='labreport',
+            name='lab_patient',
+            field=models.ForeignKey(default=b'0', to='ipcms.Patient'),
+        ),
+        migrations.AddField(
+            model_name='labreport',
+            name='lab_tech',
+            field=models.ForeignKey(default=b'', to='ipcms.LabTech'),
+        ),
+        migrations.AddField(
             model_name='emedication',
             name='patient',
-            field=models.OneToOneField(default=b'', to='ipcms.Patient'),
+            field=models.ForeignKey(default=b'', to='ipcms.Patient'),
+        ),
+        migrations.AddField(
+            model_name='emedication',
+            name='prescribed_by_doctor',
+            field=models.ForeignKey(default=b'0', to='ipcms.Doctor'),
         ),
         migrations.AddField(
             model_name='alert',
             name='alert_patient',
             field=models.OneToOneField(null=True, to='ipcms.Patient'),
+        ),
+        migrations.AddField(
+            model_name='addmedicalhistory',
+            name='patient',
+            field=models.ForeignKey(default=b'', to='ipcms.Patient'),
         ),
     ]

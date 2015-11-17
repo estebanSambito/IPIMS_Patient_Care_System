@@ -36,6 +36,13 @@
 					</form>
 
 
+				    <form id ="approver" method = "POST" action='/accounts/portal/hsp/approvals/approve'>
+				    {% csrf_token %}
+					<input type="submit" class="resolver" value="Deny Patient"><i class="icon-chevron-right"></i></a>
+						<input type="hidden" name="pk_pending" value={{patient.user_id}}>
+					</form>
+
+
 				</div>
 			</div>
 			<hr>
