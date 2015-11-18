@@ -16,10 +16,10 @@ the needs of a basic private clinic. The various features can be found below
 <li>Download the repo onto your local computer so you're in possession of all the files.</li>
 <li>Ensure that you have python installed on your machine</li>
 <li>Open your terminal or command line and navigate to the folder IPIMS_Django_Source_Files/ipcms</li>
-<li>Execute the command "sudo pip install -r requirements.txt"</li>
-<li>Once that is complete, run the command "sudo python manage.py makemigrations && python manage.py migrate && python manage.py runserver"</li>
-<li>Open your webbrowser and type in http://localhost:8000</li>
-</ol><br>
+<li>Run the command ./SYSTEM_SETUP from terminal and everything will automate in a bash script
+
+
+
 
 In order to login to the admin panel, you need to navigate to http://localhost:8000/admin. The login can be create by opening your terminal to the project directory and typing in python createsuperuser.
 
@@ -28,12 +28,18 @@ In order to login to the admin panel, you need to navigate to http://localhost:8
 <h1>Pre-load Fixture Data</h1><br>
 <ol>
 <li>Navigate to directory that the fixtures directory lives inside of</li>
-<li>Type: 'python manage.py loaddata fixtures/113initial_data.json'</li>
+<li>Type: 'python manage.py loaddata fixtures/initial_data.json4'</li>
 </ol>
 
-Username and Passwords (usernames and passwords are the same)<br>
-<blockquote class="imgur-embed-pub" lang="en" data-id="PBl5Hcl"><a href="//imgur.com/PBl5Hcl">View Usernames & Passwords Here</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
 
+<h3>The usernames and passwords are the same</h3>
+<ul>
+    <li>patient1@patient.com - patient4@patient4.com</li>
+    <li>nurse1@nurse1.com</li>
+    <li>doctor1@doctor1.com</li>
+    <li>hsp1@hsp1.com - hsp2@hsp2.com</li>
+    <li>admin, admin</li>
+</ul>
 
 #Group Website For Management
 <a href="http://group.ryan-schachte.com">http://group.ryan-schachte.com</a>
